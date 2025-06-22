@@ -1,0 +1,106 @@
+/* Paleta institucional del SENA */
+:root {
+    --sena-verde-principal: #39A900;
+    --sena-verde-secundario: #007832;
+    --sena-azul: #00304D;
+    --sena-morado: #71277A;
+    --sena-celeste: #50E5F9;
+    --sena-amarillo: #FDC300;
+    --sena-gris-claro: #F6F6F6;
+    --sena-blanco: #FFFFFF;
+    --sena-negro: #000000;
+}
+
+/* Tipografía institucional */
+body {
+    font-family: 'Work Sans', 'Calibri', sans-serif;
+    margin: 0;
+    background-color: var(--sena-gris-claro);
+    color: var(--sena-azul);
+    line-height: 1.6;
+}
+
+/* Contenedor central */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* Encabezado y pie de página */
+header,
+footer {
+    padding: 15px 0;
+}
+
+header {
+    background-color: var(--sena-verde-principal);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+footer {
+    background-color: var(--sena-azul);
+    color: white;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* Tipografía jerárquica */
+h1, h2, h3, h4 {
+    font-weight: 600;
+    color: var(--sena-azul);
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+/* Botón institucional */
+.btn-sena {
+    background-color: var(--sena-verde-principal);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-sena:hover,
+.btn-sena:focus {
+    background-color: var(--sena-verde-secundario);
+    outline: none;
+}
+
+/* Utilidades generales */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+.p-1  { padding: 1rem; }
+
+.bg-white {
+    background-color: var(--sena-blanco);
+}
+
+.rounded {
+    border-radius: 8px;
+}
+
+.shadow {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Accesibilidad: enfoque visible */
+:focus-visible {
+    outline: 3px solid var(--sena-celeste);
+    outline-offset: 2px;
+}
