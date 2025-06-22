@@ -1,0 +1,62 @@
+########################################
+# DEPENDENCIAS PHP y JS
+########################################
+/vendor/
+/node_modules/
+
+########################################
+# VARIABLES DE ENTORNO Y CONFIGURACIÓN
+########################################
+.env
+.env.*
+.env.backup
+
+########################################
+# CLAVES Y ARCHIVOS SENSIBLES
+########################################
+/storage/*.key
+/storage/oauth-*.key
+
+########################################
+# CACHÉ Y ARCHIVOS GENERADOS
+########################################
+/public/hot
+/public/storage
+/storage/debugbar
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*.log
+/storage/app/public/uploads
+
+########################################
+# RESULTADOS DE PRUEBAS
+########################################
+/phpunit.result.cache
+/coverage/
+tests/_output/
+tests/_support/_generated/
+
+########################################
+# CONFIGURACIONES DE IDE/EDITOR
+########################################
+/.idea/
+/.vscode/
+*.code-workspace
+
+########################################
+# ARCHIVOS DE SISTEMA Y TEMPORALES
+########################################
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+
+########################################
+# CACHÉ DE COMPOSER / NPM / YARN
+########################################
+composer.lock
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
