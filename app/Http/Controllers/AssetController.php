@@ -17,7 +17,8 @@ class AssetController extends Controller
 
     public function create()
     {
-        return view('inventario.create');
+        $users = \App\Models\User::orderBy('name')->get(); // todos los usuarios para asignar activo
+        return view('inventario.create', compact('users'));
     }
 
     public function store(StoreAssetRequest $request)
@@ -36,8 +37,10 @@ class AssetController extends Controller
 
     public function edit(Asset $asset)
     {
-        return view('inventario.edit', compact('asset'));
+        $users = \App\Models\User::orderBy('name')->get(); // necesario para el select
+        return view('inventario.edit', compact('asset', 'users'));
     }
+
 
     public function update(UpdateAssetRequest $request, Asset $asset)
     {

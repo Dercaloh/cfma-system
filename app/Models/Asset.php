@@ -11,9 +11,16 @@ class Asset extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'serial_number', 'type', 'brand', 'model',
-        'status', 'description'
+        'serial_number', 'placa', 'type', 'brand', 'model',
+        'status', 'condition', 'location',
+        'ownership', 'assigned_to', 'loanable', 'movable',
+        'description',
     ];
+
+    public function cuentadante()
+    {
+    return $this->belongsTo(User::class, 'assigned_to');
+    }
 
     public function loans()
     {
