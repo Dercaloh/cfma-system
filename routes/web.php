@@ -1,11 +1,12 @@
 <?php
+/*-- resources/views/inventario/index.blade.php */
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AssetController;
-
+use App\Http\Controllers\DocumentController;
 /*
 |--------------------------------------------------------------------------
 | Ruta pública
@@ -61,11 +62,21 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
 
-    // Gestión de inventario de activos
+    // 📦 Gestión del inventario
     Route::resource('/inventario', AssetController::class)
         ->names('inventario')
         ->parameters(['inventario' => 'asset']);
+
+    // 🛑 Confirmación segura de eliminación
+    Route::get('/inventario/{asset}/eliminar', [AssetController::class, 'destroy'])->name('inventario.confirmDelete');
+    Route::delete('/inventario/{asset}/eliminar', [AssetController::class, 'deleteConfirm'])->name('inventario.deleteConfirm');
+
+    // 🔄 Restauración de activos eliminados
+    Route::get('/inventario/{id}/restaurar-confirmacion', [AssetController::class, 'confirmRestore'])
+    ->name('inventario.confirmRestore');
+
 });
+
 
 // Subdirector
 Route::middleware(['auth', 'role:subdirector'])->group(function () {
@@ -96,4 +107,12 @@ Route::middleware(['auth', 'role:portería'])->group(function () {
 | Autenticación generada por Breeze
 |--------------------------------------------------------------------------
 */
+Route::post('/inventario/{asset}/documentos', [DocumentController::class, 'store'])
+    ->name('documentos.store');
+
+Route::patch('/inventario/{id}/restaurar', [AssetController::class, 'restore'])
+    ->name('inventario.restore')
+    ->middleware('auth'); // o role:administrador si usas roles
+
+
 require __DIR__ . '/auth.php';

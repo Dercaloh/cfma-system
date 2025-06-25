@@ -1,143 +1,151 @@
+<!-- resources/views/inventario/create.blade.php -->
 @extends('layouts.default')
 
 @section('title', 'Registrar Nuevo Activo')
-
-@section('content')
-<h2 class="text-2xl font-bold mb-6">Registrar Nuevo Activo</h2>
-
-@if ($errors->any())
-    <div class="bg-red-100 text-red-800 px-4 py-2 rounded mb-4">
-        <ul class="list-disc list-inside text-sm">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+@if (session('info'))
+    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded-md text-sm">
+        {{ session('info') }}
     </div>
 @endif
 
-<form action="{{ route('inventario.store') }}" method="POST" class="space-y-6 max-w-2xl mx-auto bg-white shadow p-6 rounded">
-    @csrf
+@section('content')
+<div class="max-w-3xl mx-auto bg-white/60 backdrop-blur rounded-xl p-8 shadow-md">
+    <h2 class="text-2xl font-bold mb-6 text-sena-azul">Registrar Nuevo Activo</h2>
 
-    {{-- Serial --}}
-    <div>
-        <label for="serial_number" class="block font-semibold">Serial *</label>
-        <input type="text" id="serial_number" name="serial_number" value="{{ old('serial_number') }}"
-            class="w-full border border-gray-300 rounded px-3 py-2" required>
-    </div>
-
-    {{-- Placa (si aplica) --}}
-    <div>
-        <label for="placa" class="block font-semibold">Placa (si aplica)</label>
-        <input type="text" id="placa" name="placa" value="{{ old('placa') }}"
-            class="w-full border border-gray-300 rounded px-3 py-2">
-    </div>
-
-    {{-- Propiedad --}}
-    <div>
-        <label for="ownership" class="block font-semibold">Propiedad *</label>
-        <select id="ownership" name="ownership" class="w-full border border-gray-300 rounded px-3 py-2" required>
-            @foreach(['Centro', 'Personal'] as $prop)
-                <option value="{{ $prop }}" @selected(old('ownership') === $prop)>{{ $prop }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    {{-- Tipo --}}
-    <div>
-        <label for="type" class="block font-semibold">Tipo *</label>
-        <select id="type" name="type" class="w-full border border-gray-300 rounded px-3 py-2" required>
-            <option value="">Selecciona un tipo</option>
-            @foreach(['Portátil', 'Proyector', 'Router', 'Switch', 'Impresora', 'Otro'] as $tipo)
-                <option value="{{ $tipo }}" @selected(old('type') === $tipo)>{{ $tipo }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    {{-- Marca y Modelo --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-            <label for="brand" class="block font-semibold">Marca</label>
-            <input type="text" id="brand" name="brand" value="{{ old('brand') }}"
-                class="w-full border border-gray-300 rounded px-3 py-2">
+    @if ($errors->any())
+        <div class="bg-red-100 border border-red-300 text-red-700 p-4 rounded mb-6">
+            <ul class="list-disc pl-5 text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
-        <div>
-            <label for="model" class="block font-semibold">Modelo</label>
-            <input type="text" id="model" name="model" value="{{ old('model') }}"
-                class="w-full border border-gray-300 rounded px-3 py-2">
-        </div>
-    </div>
+    @endif
 
-    {{-- Estado lógico y técnico --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <form action="{{ route('inventario.store') }}" method="POST" class="space-y-6">
+        @csrf
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="serial_number" class="block text-sm font-medium">Serial *</label>
+                <input id="serial_number" name="serial_number" type="text" required
+                       class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-sena-verde">
+            </div>
+
+            <div>
+                <label for="placa" class="block text-sm font-medium">Placa (si aplica)</label>
+                <input id="placa" name="placa" type="text"
+                       class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="ownership" class="block text-sm font-medium">Propiedad *</label>
+                <select id="ownership" name="ownership" required
+                        class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+                    @foreach(['Centro', 'Personal'] as $prop)
+                        <option value="{{ $prop }}" @selected(old('ownership') === $prop)>{{ $prop }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="type" class="block text-sm font-medium">Tipo *</label>
+                <select id="type" name="type" required
+                        class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+                    <option value="">Selecciona un tipo</option>
+                    @foreach(['Portátil', 'Proyector', 'Router', 'Switch', 'Impresora', 'Otro'] as $tipo)
+                        <option value="{{ $tipo }}" @selected(old('type') === $tipo)>{{ $tipo }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="brand" class="block text-sm font-medium">Marca</label>
+                <input id="brand" name="brand" type="text"
+                       class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+            </div>
+
+            <div>
+                <label for="model" class="block text-sm font-medium">Modelo</label>
+                <input id="model" name="model" type="text"
+                       class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="status" class="block text-sm font-medium">Estado lógico *</label>
+                <select id="status" name="status" required
+                        class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+                    @foreach(['Disponible', 'Prestado', 'En mantenimiento', 'Retirado'] as $estado)
+                        <option value="{{ $estado }}" @selected(old('status') === $estado)>{{ $estado }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="condition" class="block text-sm font-medium">Condición técnica *</label>
+                <select id="condition" name="condition" required
+                        class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+                    @foreach(['Bueno', 'Regular', 'Dañado', 'En diagnóstico'] as $cond)
+                        <option value="{{ $cond }}" @selected(old('condition') === $cond)>{{ $cond }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
         <div>
-            <label for="status" class="block font-semibold">Estado lógico *</label>
-            <select id="status" name="status" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                @foreach(['Disponible', 'Prestado', 'En mantenimiento', 'Retirado'] as $estado)
-                    <option value="{{ $estado }}" @selected(old('status') === $estado)>{{ $estado }}</option>
+            <label for="location" class="block text-sm font-medium">Ubicación *</label>
+            <select id="location" name="location" required
+                    class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+                @foreach(['Almacén', 'Con usuario'] as $loc)
+                    <option value="{{ $loc }}" @selected(old('location') === $loc)>{{ $loc }}</option>
                 @endforeach
             </select>
         </div>
+
         <div>
-            <label for="condition" class="block font-semibold">Condición técnica *</label>
-            <select id="condition" name="condition" class="w-full border border-gray-300 rounded px-3 py-2" required>
-                @foreach(['Bueno', 'Regular', 'Dañado', 'En diagnóstico'] as $cond)
-                    <option value="{{ $cond }}" @selected(old('condition') === $cond)>{{ $cond }}</option>
+            <label for="assigned_to" class="block text-sm font-medium">Asignado a (opcional)</label>
+            <select name="assigned_to" id="assigned_to"
+                    class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">
+                <option value="">Sin asignar</option>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}" @selected(old('assigned_to') == $user->id)>
+                        {{ $user->name }} ({{ $user->email }})
+                    </option>
                 @endforeach
             </select>
         </div>
-    </div>
 
-    {{-- Ubicación --}}
-    <div>
-        <label for="location" class="block font-semibold">Ubicación *</label>
-        <select id="location" name="location" class="w-full border border-gray-300 rounded px-3 py-2" required>
-            @foreach(['Almacén', 'Con usuario'] as $loc)
-                <option value="{{ $loc }}" @selected(old('location') === $loc)>{{ $loc }}</option>
-            @endforeach
-        </select>
-    </div>
+        <div class="flex items-center space-x-6">
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" name="loanable" value="1" class="accent-sena-verde" @checked(old('loanable', true))>
+                <span class="text-sm">Disponible para préstamo</span>
+            </label>
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" name="movable" value="1" class="accent-sena-verde" @checked(old('movable', false))>
+                <span class="text-sm">Puede salir del centro</span>
+            </label>
+        </div>
 
-    {{-- Asignado a --}}
-    <div>
-        <label for="assigned_to" class="block font-semibold">Asignado a (opcional)</label>
-        <select name="assigned_to" id="assigned_to" class="w-full border border-gray-300 rounded px-3 py-2">
-            <option value="">Sin asignar</option>
-            @foreach($users as $user)
-                <option value="{{ $user->id }}" @selected(old('assigned_to') == $user->id)>
-                    {{ $user->name }} ({{ $user->email }})
-                </option>
-            @endforeach
-        </select>
-    </div>
+        <div>
+            <label for="description" class="block text-sm font-medium">Descripción</label>
+            <textarea id="description" name="description" rows="3"
+                      class="mt-1 w-full px-3 py-2 rounded-lg border border-gray-300">{{ old('description') }}</textarea>
+        </div>
 
-    {{-- Permisos --}}
-    <div class="flex items-center gap-6">
-        <label class="inline-flex items-center">
-            <input type="checkbox" name="loanable" value="1" class="rounded border-gray-300"
-                @checked(old('loanable', true))>
-            <span class="ml-2 text-sm">Disponible para préstamo</span>
-        </label>
-
-        <label class="inline-flex items-center">
-            <input type="checkbox" name="movable" value="1" class="rounded border-gray-300"
-                @checked(old('movable', false))>
-            <span class="ml-2 text-sm">Puede salir del centro</span>
-        </label>
-    </div>
-
-    {{-- Descripción --}}
-    <div>
-        <label for="description" class="block font-semibold">Descripción</label>
-        <textarea id="description" name="description" rows="3"
-            class="w-full border border-gray-300 rounded px-3 py-2">{{ old('description') }}</textarea>
-    </div>
-
-    {{-- Acciones --}}
-    <div class="pt-4 flex items-center gap-4">
-        <button type="submit" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
-            Guardar Activo
-        </button>
-        <a href="{{ route('inventario.index') }}" class="text-gray-600 hover:underline">Cancelar</a>
-    </div>
-</form>
+        <div class="pt-4 flex justify-end gap-4">
+            <a href="{{ route('inventario.index') }}"
+               class="text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-gray-700">Cancelar</a>
+            <button type="submit"
+                    class="text-sm bg-sena-verde hover:bg-sena-verde-sec text-white font-semibold px-5 py-2 rounded">
+                Guardar Activo
+            </button>
+        </div>
+    </form>
+</div>
 @endsection
