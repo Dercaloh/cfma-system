@@ -1,5 +1,5 @@
 <?php
-
+/*-- App/Http/Requests/StoreAssetRequest.php */
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -16,14 +16,18 @@ class StoreAssetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'serial_number' => 'required|string|max:255|unique:assets,serial_number',
+            'serial_number' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('assets', 'serial_number')->whereNull('deleted_at'),
+            ],
 
-            // Placa solo es requerida si el activo es del centro
             'placa' => [
                 'nullable',
                 'string',
                 Rule::requiredIf(fn () => $this->ownership === 'Centro'),
-                'unique:assets,placa',
+                Rule::unique('assets', 'placa')->whereNull('deleted_at'),
             ],
 
             'ownership'    => 'required|in:Centro,Personal',

@@ -93,6 +93,72 @@
             <p class="text-gray-800">{{ $asset->description ?? '—' }}</p>
         </div>
 
+        {{-- Documentos Asociados --}}
+        @if ($asset->documents->count())
+            <div class="mt-8 border-t pt-6">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800">📎 Documentos Asociados</h3>
+
+                <ul class="space-y-3">
+                    @foreach ($asset->documents as $doc)
+                        <li class="flex justify-between items-center bg-gray-50 p-3 rounded border text-sm">
+                            <div>
+                                <a href="{{ asset('storage/' . $doc->path) }}" target="_blank" class="text-blue-600 hover:underline">
+                                    {{ $doc->filename }}
+                                </a>
+                                @if ($doc->description)
+                                    <p class="text-gray-500">{{ $doc->description }}</p>
+                                @endif
+                            </div>
+                            <span class="text-xs text-gray-400">
+                                {{ \Illuminate\Support\Carbon::parse($doc->created_at)->format('d/m/Y') }}
+                            </span>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @can('update', $asset)
+    <div class="mt-10 border-t pt-6">
+        <h3 class="text-lg font-semibold mb-3">📤 Subir nuevo documento</h3>
+
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-300 text-red-700 p-3 rounded mb-4">
+                <ul class="list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('documentos.store', $asset) }}" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+
+            <div>
+                <label for="file" class="block text-sm font-semibold">Archivo *</label>
+                <input type="file" name="file" required
+                    class="block w-full border border-gray-300 rounded px-3 py-2">
+                <p class="text-xs text-gray-500 mt-1">
+                    Archivos permitidos: PDF, DOCX, XLSX, JPG, PNG (máx. 2MB).
+                </p>
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-semibold">Descripción</label>
+                <input type="text" name="description" maxlength="255"
+                    class="block w-full border border-gray-300 rounded px-3 py-2">
+            </div>
+
+            <button type="submit"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">
+                Subir Documento
+            </button>
+        </form>
+    </div>
+@endcan
+
+
         {{-- Acciones --}}
         <div class="flex justify-end pt-4">
             <a href="{{ route('inventario.edit', $asset) }}"

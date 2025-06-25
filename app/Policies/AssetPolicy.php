@@ -37,7 +37,7 @@ class AssetPolicy
      */
     public function update(User $user, Asset $asset): bool
     {
-        return false;
+        return in_array($user->role->name, ['administrador', 'supervisor']);
     }
 
     /**

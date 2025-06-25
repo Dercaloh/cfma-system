@@ -1,5 +1,5 @@
 <?php
-
+/*-- App/Http/Requests/UpdateAssetRequest.php */
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -22,6 +22,7 @@ class UpdateAssetRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('assets', 'serial_number')->ignore($assetId),
+                Rule::unique('assets', 'serial_number')->whereNull('deleted_at')
             ],
 
             'placa' => [
