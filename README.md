@@ -104,7 +104,13 @@ Agrega al archivo `hosts`:
 ## 📜 Licencia
 
 Este software es de uso interno del **Centro de Formación Minero Ambiental del SENA**  
-Distribuido bajo licencia [MIT](https://opensource.org/licenses/MIT).
+Este proyecto está licenciado bajo los términos de la [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)  
+con una excepción adicional que **prohíbe su uso comercial sin autorización escrita**.
+
+> © 2025 Harold A. Cordero Solera  
+> Contacto: [ingharoldcordero@gmail.com](mailto:ingharoldcordero@gmail.com)
+
+Puedes revisar el archivo completo de licencia en [`LICENSE.md`](./LICENSE.md).
 
 ---
 
