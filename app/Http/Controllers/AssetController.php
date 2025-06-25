@@ -9,19 +9,36 @@ use App\Http\Requests\UpdateAssetRequest;
 
 class AssetController extends Controller
 {
-        // Constructor para aplicar middleware de autorización
+
+    // app/Http/Controllers/AssetController.php
+
     public function index(Request $request)
     {
         $query = Asset::query();
 
-        if ($request->filled('conEliminados')) {
+        // Si se activan los eliminados, incluirlos
+        if ($request->boolean('conEliminados')) {
             $query->withTrashed();
         }
 
-        $assets = $query->latest()->paginate(10)->withQueryString();
+        // Aplicar filtros dinámicos si están presentes
+        $filters = $request->only(['status', 'type']);
+
+        foreach ($filters as $field => $value) {
+            if (!empty($value)) {
+                $query->where($field, $value);
+            }
+        }
+
+        $assets = $query
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString(); // Mantener filtros en la paginación
 
         return view('inventario.index', compact('assets'));
     }
+
+
     // Formulario de creación de activos
     public function create()
     {

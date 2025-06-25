@@ -23,13 +23,46 @@
         </div>
     @endif
 
-    <!-- Filtro eliminados -->
-    <form method="GET" class="text-sm">
-        <label class="inline-flex items-center text-gray-700">
-            <input type="checkbox" name="conEliminados" value="1" onchange="this.form.submit()"
-                class="rounded border-gray-300 text-sena-verde focus:ring-sena-verde" @checked(request('conEliminados'))>
-            <span class="ml-2">Mostrar activos eliminados</span>
-        </label>
+    <!-- Filtros -->
+        <h3 class="text-lg font-semibold text-sena-azul">Filtros rápidos</h3>
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm bg-white/40 backdrop-blur-md shadow-md rounded-lg p-4 border border-sena-verde">
+        <!-- Estado -->
+        <div>
+            <label for="status" class="block font-medium text-gray-700">Estado</label>
+            <select name="status" id="status" onchange="this.form.submit()" class="form-select-sena">
+                <option value="">Todos</option>
+                @foreach(['Disponible', 'Prestado', 'En mantenimiento', 'Retirado'] as $estado)
+                    <option value="{{ $estado }}" @selected(request('status') === $estado)>{{ $estado }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tipo -->
+        <div>
+            <label for="type" class="block font-medium text-gray-700">Tipo</label>
+            <select name="type" id="type" onchange="this.form.submit()" class="form-select-sena">
+                <option value="">Todos</option>
+                @foreach(['Portátil', 'Proyector', 'Router', 'Switch', 'Impresora', 'Otro'] as $tipo)
+                    <option value="{{ $tipo }}" @selected(request('type') === $tipo)>{{ $tipo }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Mostrar eliminados -->
+        <div class="flex items-end">
+            <label class="inline-flex items-center space-x-2 text-gray-700">
+                <input type="checkbox" name="conEliminados" value="1" onchange="this.form.submit()" @checked(request('conEliminados'))
+                    class="rounded border-gray-300 text-sena-verde focus:ring-sena-verde">
+                <span>Mostrar eliminados</span>
+            </label>
+        </div>
+
+        <!-- Limpiar -->
+        <div class="flex items-end justify-end">
+            <a href="{{ route('inventario.index') }}" class="btn-sena bg-red-100 text-red-600 hover:bg-red-200">
+                Limpiar filtros
+            </a>
+        </div>
     </form>
 
     <!-- Tabla -->
