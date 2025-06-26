@@ -1,5 +1,12 @@
 <?php
-
+ /* Asset Model
+ *
+ * This model represents an asset in the inventory system.
+ * It includes properties such as serial number, type, brand, model,
+ * status, condition, location, ownership, and more.
+ *
+ * @package App\Models
+ */
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{

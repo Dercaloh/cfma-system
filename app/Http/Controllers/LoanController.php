@@ -1,5 +1,5 @@
 <?php
-
+// LoanController.php
 namespace App\Http\Controllers;
 
 use App\Models\Loan;

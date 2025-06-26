@@ -1,5 +1,5 @@
 <?php
-
+//  * LoanStatus Model
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\{
