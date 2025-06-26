@@ -4,124 +4,108 @@ namespace App\Http\Controllers;
 
 use App\Models\Loan;
 use App\Models\Asset;
-use App\Models\User;
 use App\Models\LoanStatus;
+use App\Models\Signature;
+use App\Models\GateLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
 
 class LoanController extends Controller
 {
+    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    // Listar préstamos
-    public function index()
+    /**
+     * Helper: obtiene el ID de un estado de préstamo.
+     */
+    protected function getStatusId(string $name): ?int
     {
-        $this->authorize('viewAny', Loan::class);
-
-        $loans = Loan::with(['user', 'asset', 'status'])->latest()->paginate(10);
-        return view('loans.index', compact('loans'));
+        return LoanStatus::where('name', $name)->value('id');
     }
 
-    // Mostrar formulario de solicitud
-    public function create()
-    {
-        $this->authorize('create', Loan::class);
+    // ... index(), create(), store(), show(), edit(), update(), destroy() ...
 
-        $assets = Asset::where('status', 'Disponible')->get();
-        return view('loans.create', compact('assets'));
-    }
-
-    // Almacenar solicitud
-    public function store(Request $request)
+    /**
+     * Check-Out: registro de entrega y firma.
+     */
+    public function checkOut(Request $request, Loan $loan)
     {
-        $this->authorize('create', Loan::class);
+        $this->authorize('deliver', $loan);
+
+        if ($loan->status->name !== 'aprobado') {
+            return back()->with('error', 'Solo préstamos aprobados pueden entregarse.');
+        }
 
         $request->validate([
-            'asset_id' => 'required|exists:assets,id',
-            'notes' => 'nullable|string|max:1000',
+            'signature' => 'required|file|mimes:png,svg|max:1024'
         ]);
 
-        Loan::create([
-            'user_id' => auth()->id(),
-            'asset_id' => $request->asset_id,
-            'status_id' => LoanStatus::where('name', 'pendiente')->first()->id,
-            'notes' => $request->notes,
-            'requested_at' => now(),
-        ]);
+        $path = $request->file('signature')->store('signatures', 'public');
 
-        return redirect()->route('loans.index')->with('success', 'Solicitud registrada correctamente.');
-    }
-
-    // Ver detalles de un préstamo
-    public function show(Loan $loan)
-    {
-        $this->authorize('view', $loan);
-
-        $loan->load(['user', 'asset', 'status']);
-        return view('loans.show', compact('loan'));
-    }
-
-    // Editar préstamo
-    public function edit(Loan $loan)
-    {
-        $this->authorize('update', $loan);
-
-        $assets = Asset::where('status', 'Disponible')->orWhere('id', $loan->asset_id)->get();
-        return view('loans.edit', compact('loan', 'assets'));
-    }
-
-    // Actualizar préstamo
-    public function update(Request $request, Loan $loan)
-    {
-        $this->authorize('update', $loan);
-
-        $request->validate([
-            'asset_id' => 'required|exists:assets,id',
-            'notes' => 'nullable|string|max:1000',
+        $loan->signatures()->create([
+            'user_id'        => Auth::id(),
+            'type'           => 'entrega',
+            'signature_path' => $path,
         ]);
 
         $loan->update([
-            'asset_id' => $request->asset_id,
-            'notes' => $request->notes,
+            'status_id'    => $this->getStatusId('entregado'),
+            'delivered_at' => now(),
         ]);
 
-        return redirect()->route('loans.index')->with('success', 'Préstamo actualizado.');
+        return back()->with('success', 'Entrega registrada correctamente.');
     }
 
-    // Eliminar préstamo (solo si no ha sido entregado)
-    public function destroy(Loan $loan)
+    /**
+     * Check-In: registro de devolución y firma.
+     */
+    public function checkIn(Request $request, Loan $loan)
     {
-        $this->authorize('delete', $loan);
+        $this->authorize('returnAsset', $loan);
 
-        $loan->delete();
-        return redirect()->route('loans.index')->with('success', 'Préstamo eliminado.');
+        if ($loan->status->name !== 'entregado') {
+            return back()->with('error', 'El préstamo aún no ha sido entregado.');
+        }
+
+        $request->validate([
+            'signature' => 'required|file|mimes:png,svg|max:1024'
+        ]);
+
+        $path = $request->file('signature')->store('signatures', 'public');
+
+        $loan->signatures()->create([
+            'user_id'        => Auth::id(),
+            'type'           => 'devolucion',
+            'signature_path' => $path,
+        ]);
+
+        $loan->update([
+            'status_id'   => $this->getStatusId('devuelto'),
+            'returned_at' => now(),
+        ]);
+
+        return back()->with('success', 'Devolución registrada correctamente.');
     }
 
-    // Aprobar préstamo
+    /**
+     * Aprobar préstamo.
+     */
     public function approve(Loan $loan)
     {
         $this->authorize('approve', $loan);
 
         $loan->update([
-            'status_id' => LoanStatus::where('name', 'aprobado')->first()->id,
+            'status_id'   => $this->getStatusId('aprobado'),
             'approved_at' => now(),
         ]);
 
         return back()->with('success', 'Préstamo aprobado.');
-    }
-
-    // Registrar devolución
-    public function return(Loan $loan)
-    {
-        $this->authorize('returnAsset', $loan);
-
-        $loan->update([
-            'status_id' => LoanStatus::where('name', 'devuelto')->first()->id,
-            'returned_at' => now(),
-        ]);
-
-        return back()->with('success', 'Activo devuelto correctamente.');
     }
 }

@@ -7,6 +7,24 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\LoanController;
+use App\Http\Controllers\GateController;
+
+// Gestión de préstamos (todos los roles autenticados con permiso)
+Route::middleware('auth')->group(function () {
+    Route::resource('/prestamos', LoanController::class)->names('prestamos');
+
+    // Acciones personalizadas: aprobar, entregar (checkOut), devolver (checkIn)
+    Route::post('/prestamos/{loan}/aprobar', [LoanController::class, 'approve'])->name('prestamos.aprobar');
+    Route::post('/prestamos/{loan}/entregar', [LoanController::class, 'checkOut'])->name('prestamos.entregar');
+    Route::post('/prestamos/{loan}/devolver', [LoanController::class, 'checkIn'])->name('prestamos.devolver');
+});
+
+// Registro en portería (solo usuarios con rol 'porteria')
+Route::middleware(['auth', 'role:portería'])->group(function () {
+    Route::post('/porteria/{asset}/registro', [GateController::class, 'log'])->name('porteria.registro');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Ruta pública
@@ -46,6 +64,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::resource('/prestamos', LoanController::class)->names('prestamos');
+
+    // Acciones personalizadas: aprobar, entregar (checkOut), devolver (checkIn)
+    Route::post('/prestamos/{loan}/aprobar', [LoanController::class, 'approve'])->name('prestamos.aprobar');
+    Route::post('/prestamos/{loan}/entregar', [LoanController::class, 'checkOut'])->name('prestamos.entregar');
+    Route::post('/prestamos/{loan}/devolver', [LoanController::class, 'checkIn'])->name('prestamos.devolver');
+});
+
+// Registro en portería (solo usuarios con rol 'porteria')
+Route::middleware(['auth', 'role:portería'])->group(function () {
+    Route::post('/porteria/{asset}/registro', [GateController::class, 'log'])->name('porteria.registro');
 });
 
 /*
