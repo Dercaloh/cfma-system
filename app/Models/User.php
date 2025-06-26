@@ -2,73 +2,60 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\{
-    Factories\HasFactory,
-    Relations\BelongsTo,
-    SoftDeletes
-};
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    /**
-     * Atributos asignables masivamente
-     */
+    // Campos que se pueden asignar de forma masiva
     protected $fillable = [
-        'name', 'email', 'password', 'role_id',
-        'employee_id', 'department', 'email_verified_at'
+        'name',
+        'email',
+        'password',
+        'role_id',
+        'employee_id',
     ];
 
-    /**
-     * Atributos ocultos
-     */
-    protected $hidden = ['password', 'remember_token'];
+    // Campos que deben ocultarse en respuestas JSON
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    /**
-     * Casts de atributos
-     */
+    // Casts automáticos para columnas de la base de datos
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'last_login' => 'datetime',
     ];
 
-    /** Relación: Un usuario pertenece a un rol */
-    public function role(): BelongsTo
+    /**
+     * Relación: Un usuario pertenece a un rol
+     *
+     * Esta relación permite acceder a los datos del rol usando:
+     * $user->role->name
+     */
+    public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
-    /** Relación: Un usuario puede tener muchos préstamos */
+    /**
+     * Relación: Un usuario puede tener muchos préstamos
+     */
     public function loans()
     {
         return $this->hasMany(Loan::class);
     }
 
-    /** Relación: Un usuario puede generar logs de auditoría */
+    /**
+     * Relación: Un usuario puede tener muchos registros de auditoría
+     */
     public function auditLogs()
     {
         return $this->hasMany(AuditLog::class);
     }
-
-    /**
-     * Verifica si el usuario tiene uno o varios roles
-     */
-    public function hasRole(string|array $roles): bool
-    {
-        $roleName = $this->role->name ?? null;
-        return is_array($roles)
-            ? in_array($roleName, $roles)
-            : $roleName === $roles;
-    }
-
-    /** Registra el último inicio de sesión */
-    public function registerLastLogin(): void
-    {
-        $this->last_login = now();
-        $this->save();
-    }
 }
+

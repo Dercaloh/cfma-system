@@ -1,61 +1,120 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📦 Sistema de Gestión de Préstamos e Inventario de Activos de TI – CFMA
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+    <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="360" alt="Laravel Logo">
 </p>
 
-## About Laravel
+<p align="center">
+    <strong>CFMA - SENA | Laravel 10 | PHP 8.x | MySQL/MariaDB | XAMPP</strong><br>
+    Sistema modular, seguro y escalable para gestionar activos de TI, préstamos, seguimiento documental y trazabilidad en el Centro de Formación Minero Ambiental del SENA.
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🧩 Características Principales
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- 🔐 Acceso autenticado por roles (`administrador`, `subdirector`, `supervisor`, `instructor`, `portería`)
+- 🖥️ Inventario de activos con soporte para documentos asociados
+- 🔄 Flujo completo de préstamos: solicitud, aprobación, entrega y devolución
+- 📎 Gestión documental con relaciones polimórficas
+- 📬 Alertas de vencimiento y bitácora de auditoría conforme a ISO 27001
+- 📊 Reportes exportables (PDF/Excel) con filtros avanzados
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Tecnologías
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- [Laravel 10.x](https://laravel.com)
+- [PHP 8.x](https://www.php.net/)
+- [MySQL/MariaDB](https://www.mysql.com/)
+- [XAMPP](https://www.apachefriends.org/)
+- [Laravel Breeze](https://laravel.com/docs/starter-kits#breeze)
+- [Bootstrap 5.3](https://getbootstrap.com/)
+- [Dompdf](https://github.com/barryvdh/laravel-dompdf)
+- [Maatwebsite Excel](https://laravel-excel.com/)
+- [Spatie Laravel Permission (opcional)](https://spatie.be/docs/laravel-permission/)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## 🚀 Instalación Local
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Requisitos
 
-### Premium Partners
+- Windows 11
+- XAMPP (Apache en puerto 8080)
+- Composer
+- Node.js + npm
+- Git
+- VS Code
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Pasos
 
-## Contributing
+```bash
+git clone https://github.com/dercaloh/cfma-system.git
+cd cfma-system
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+composer install
+cp .env.example .env
+php artisan key:generate
 
-## Code of Conduct
+php artisan migrate --seed
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+npm install
+npm run dev
+```
 
-## Security Vulnerabilities
+Configura `.env`:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```dotenv
+APP_NAME=CFMA
+APP_URL=http://cfma.local:8080
+DB_DATABASE=cfma_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## License
+Agrega al archivo `hosts`:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+127.0.0.1 cfma.local
+```
+
+---
+
+## 🔐 Accesos Iniciales
+
+| Rol           | Usuario                | Contraseña |
+|---------------|------------------------|------------|
+| Administrador | admin@cfma.local       | admin123   |
+| Subdirector   | sub@cfma.local         | sub123     |
+| Instructor    | instructor@cfma.local  | inst123    |
+
+> Estas cuentas son cargadas vía seeders. Puedes modificarlas desde el panel administrativo.
+
+---
+
+## 📚 Documentación
+
+- `docs/instalacion.md`: Guía técnica paso a paso
+- `docs/manual-usuario.pdf`: Manual para usuarios finales
+- `docs/esquema-bd.pdf`: Diagrama entidad-relación (base de datos)
+
+---
+
+## 📜 Licencia
+
+Este software es de uso interno del **Centro de Formación Minero Ambiental del SENA**  
+Este proyecto está licenciado bajo los términos de la [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)  
+con una excepción adicional que **prohíbe su uso comercial sin autorización escrita**.
+
+> © 2025 Harold A. Cordero Solera  
+> Contacto: [ingharoldcordero@gmail.com](mailto:ingharoldcordero@gmail.com)
+
+Puedes revisar el archivo completo de licencia en [`LICENSE.md`](./LICENSE.md).
+
+---
+
+## ✉️ Contacto
+
+> Desarrollado por Harold A. Cordero Solera  
+> Contacto: [ingharoldcordero@gmail.com](mailto:ingharoldcordero@gmail.com)

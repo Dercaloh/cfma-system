@@ -7,19 +7,24 @@ use Illuminate\Support\Facades\DB;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Crea los roles principales del sistema.
-     */
     public function run(): void
     {
         $roles = [
-            ['name' => 'administrador', 'description' => 'Acceso total', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'subdirector', 'description' => 'Aprueba préstamos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'supervisor', 'description' => 'Reportes y seguimiento', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'instructor', 'description' => 'Solicita préstamos', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'portería', 'description' => 'Check-in / Check-out', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'administrador', 'description' => 'Acceso total'],
+            ['name' => 'subdirector', 'description' => 'Aprueba préstamos'],
+            ['name' => 'supervisor', 'description' => 'Reportes y seguimiento'],
+            ['name' => 'instructor', 'description' => 'Solicita préstamos'],
+            ['name' => 'portería', 'description' => 'Check-in / Check-out'],
         ];
 
-        DB::table('roles')->insert($roles);
+        foreach ($roles as $role) {
+            DB::table('roles')->updateOrInsert(
+                ['name' => $role['name']],
+                array_merge($role, [
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ])
+            );
+        }
     }
 }
