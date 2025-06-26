@@ -13,7 +13,9 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 
-class LoanController extends Controller
+use Illuminate\Routing\Controller as BaseController;
+
+class LoanController extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
