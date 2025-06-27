@@ -38,5 +38,14 @@ class Asset extends Model
     {
         return $this->morphMany(Document::class, 'documentable');
     }
+    public function gateLogs()
+    {
+        return $this->hasMany(GateLog::class);
+    }
+
+    public function exitPasses()
+    {
+        return $this->hasManyThrough(ExitPass::class, GateLog::class);
+    }
 }
 

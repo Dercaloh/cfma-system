@@ -3,11 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AssetController;
-use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\LoanController;
-use App\Http\Controllers\GateController;
+
+// Controladores
+use App\Http\Controllers\{
+    ProfileController,
+    AssetController,
+    DocumentController,
+    LoanController,
+    GateController,
+    ExitPassController
+};
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +27,7 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Ruta común después de login (redirige según rol)
+| Redirección dinámica tras login
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard', function (Request $request) {
@@ -40,7 +45,7 @@ Route::get('/dashboard', function (Request $request) {
 
 /*
 |--------------------------------------------------------------------------
-| Gestión de Perfil (común para todos los usuarios autenticados)
+| Perfil de usuario
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -51,7 +56,7 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Gestión de Préstamos
+| Gestión de préstamos (todos los roles autenticados)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -63,18 +68,24 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Registro en Portería (solo portería)
+| Módulo de portería (solo rol: portería)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:portería'])->group(function () {
+    Route::view('/porteria/dashboard', 'porteria.dashboard')->name('porteria.dashboard');
+    Route::view('/prestamos/checkin', 'prestamos.checkin')->name('prestamos.checkin');
+    Route::view('/prestamos/checkout', 'prestamos.checkout')->name('prestamos.checkout');
+
     Route::post('/porteria/{asset}/registro', [GateController::class, 'log'])->name('porteria.registro');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Dashboards y Vistas por Rol
+| Rutas por Rol
 |--------------------------------------------------------------------------
 */
+
+// ADMINISTRADOR
 Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
 
@@ -85,43 +96,40 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::get('/inventario/{asset}/eliminar', [AssetController::class, 'destroy'])->name('inventario.confirmDelete');
     Route::delete('/inventario/{asset}/eliminar', [AssetController::class, 'deleteConfirm'])->name('inventario.deleteConfirm');
     Route::get('/inventario/{id}/restaurar-confirmacion', [AssetController::class, 'confirmRestore'])->name('inventario.confirmRestore');
+    Route::patch('/inventario/{id}/restaurar', [AssetController::class, 'restore'])->name('inventario.restore');
+    Route::post('/inventario/{asset}/documentos', [DocumentController::class, 'store'])->name('documentos.store');
 });
 
+// SUBDIRECTOR
 Route::middleware(['auth', 'role:subdirector'])->group(function () {
     Route::view('/subdirector/dashboard', 'subdirector.dashboard')->name('subdirector.dashboard');
     Route::view('/prestamos/aprobar', 'prestamos.aprobar')->name('prestamos.aprobar');
 });
 
+// SUPERVISOR
 Route::middleware(['auth', 'role:supervisor'])->group(function () {
     Route::view('/supervisor/dashboard', 'supervisor.dashboard')->name('supervisor.dashboard');
 });
 
+// INSTRUCTOR
 Route::middleware(['auth', 'role:instructor'])->group(function () {
     Route::view('/instructor/dashboard', 'instructor.dashboard')->name('instructor.dashboard');
     Route::view('/prestamos/solicitar', 'prestamos.solicitar')->name('prestamos.solicitar');
 });
 
-Route::middleware(['auth', 'role:portería'])->group(function () {
-    Route::view('/porteria/dashboard', 'porteria.dashboard')->name('porteria.dashboard');
-    Route::view('/prestamos/checkin', 'prestamos.checkin')->name('prestamos.checkin');
-    Route::view('/prestamos/checkout', 'prestamos.checkout')->name('prestamos.checkout');
+/*
+|--------------------------------------------------------------------------
+| Actas (Exit Pass)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/actas/{exitPass}', [ExitPassController::class, 'show'])->name('exit_passes.show');
+    Route::get('/actas/{exitPass}/pdf', [ExitPassController::class, 'generatePDF'])->name('exit_passes.pdf');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Carga de documentos y restauración de activos
-|--------------------------------------------------------------------------
-*/
-Route::post('/inventario/{asset}/documentos', [DocumentController::class, 'store'])
-    ->name('documentos.store');
-
-Route::patch('/inventario/{id}/restaurar', [AssetController::class, 'restore'])
-    ->name('inventario.restore')
-    ->middleware('auth');
-
-/*
-|--------------------------------------------------------------------------
-| Breeze
+| Breeze (Laravel auth)
 |--------------------------------------------------------------------------
 */
 require __DIR__ . '/auth.php';
