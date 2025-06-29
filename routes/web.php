@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-// Controladores
 use App\Http\Controllers\{
     ProfileController,
     AssetController,
@@ -56,9 +55,15 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Gestión de préstamos (todos los roles autenticados)
+| Gestión de préstamos
 |--------------------------------------------------------------------------
 */
+// Solo quienes pueden solicitar
+Route::middleware(['auth', 'role:instructor,subdirector,supervisor,administrador'])->group(function () {
+    Route::get('/prestamos/solicitar', [LoanController::class, 'create'])->name('prestamos.solicitar');
+});
+
+// Acciones disponibles para todos los autenticados
 Route::middleware('auth')->group(function () {
     Route::resource('/prestamos', LoanController::class)->names('prestamos');
     Route::post('/prestamos/{loan}/aprobar', [LoanController::class, 'approve'])->name('prestamos.aprobar');
@@ -68,13 +73,13 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Módulo de portería (solo rol: portería)
+| Módulo de portería
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:portería'])->group(function () {
     Route::view('/porteria/dashboard', 'porteria.dashboard')->name('porteria.dashboard');
-    Route::view('/prestamos/checkin', 'prestamos.checkin')->name('prestamos.checkin');
-    Route::view('/prestamos/checkout', 'prestamos.checkout')->name('prestamos.checkout');
+    Route::view('/porteria/checkin', 'prestamos.checkin')->name('porteria.checkin');      // Renombrado
+    Route::view('/porteria/checkout', 'prestamos.checkout')->name('porteria.checkout');   // Renombrado
 
     Route::post('/porteria/{asset}/registro', [GateController::class, 'log'])->name('porteria.registro');
 });
@@ -84,7 +89,6 @@ Route::middleware(['auth', 'role:portería'])->group(function () {
 | Rutas por Rol
 |--------------------------------------------------------------------------
 */
-
 // ADMINISTRADOR
 Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
@@ -114,7 +118,6 @@ Route::middleware(['auth', 'role:supervisor'])->group(function () {
 // INSTRUCTOR
 Route::middleware(['auth', 'role:instructor'])->group(function () {
     Route::view('/instructor/dashboard', 'instructor.dashboard')->name('instructor.dashboard');
-    Route::view('/prestamos/solicitar', 'prestamos.solicitar')->name('prestamos.solicitar');
 });
 
 /*

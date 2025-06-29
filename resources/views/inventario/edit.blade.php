@@ -125,19 +125,22 @@
         </div>
 
         {{-- Permite préstamo y salida --}}
-        <div class="flex items-center gap-6">
-            <label class="inline-flex items-center">
-                <input type="checkbox" name="loanable" value="1" class="rounded border-gray-300"
-                    @checked(old('loanable', $asset->loanable))>
-                <span class="ml-2 text-sm">Disponible para préstamo</span>
-            </label>
+    <div class="flex items-center gap-6">
+        <label class="inline-flex items-center">
+            <input type="hidden" name="loanable" value="0">
+            <input type="checkbox" name="loanable" value="1" class="rounded border-gray-300"
+                @checked(old('loanable', $asset->loanable))>
+            <span class="ml-2 text-sm">Disponible para préstamo</span>
+        </label>
 
-            <label class="inline-flex items-center">
-                <input type="checkbox" name="movable" value="1" class="rounded border-gray-300"
-                    @checked(old('movable', $asset->movable))>
-                <span class="ml-2 text-sm">Puede salir del centro</span>
-            </label>
-        </div>
+        <label class="inline-flex items-center">
+            <input type="hidden" name="movable" value="0">
+            <input type="checkbox" name="movable" value="1" class="rounded border-gray-300"
+                @checked(old('movable', $asset->movable))>
+            <span class="ml-2 text-sm">Puede salir del centro</span>
+        </label>
+    </div>
+
 
         {{-- Descripción --}}
         <div>

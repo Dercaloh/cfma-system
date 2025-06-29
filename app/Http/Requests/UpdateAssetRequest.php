@@ -7,30 +7,34 @@ use Illuminate\Validation\Rule;
 
 class UpdateAssetRequest extends FormRequest
 {
-     public function authorize(): bool
+    public function authorize(): bool
     {
-    return $this->user() && $this->user()->role->name === 'administrador';
+        return $this->user() && $this->user()->role->name === 'administrador';
     }
 
     public function rules(): array
     {
         $assetId = $this->route('asset')->id ?? null;
+        $ownership = $this->input('ownership');
 
         return [
             'serial_number' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('assets', 'serial_number')->ignore($assetId),
-                Rule::unique('assets', 'serial_number')->whereNull('deleted_at')
+                Rule::unique('assets', 'serial_number')
+                    ->ignore($assetId)
+                    ->whereNull('deleted_at'),
             ],
 
-            'placa' => [
+            'placa' => array_filter([
                 'nullable',
                 'string',
-                Rule::requiredIf(fn () => $this->ownership === 'Centro'),
-                Rule::unique('assets', 'placa')->ignore($assetId),
-            ],
+                $ownership === 'Centro' ? 'required' : null,
+                Rule::unique('assets', 'placa')
+                    ->ignore($assetId)
+                    ->whereNull('deleted_at'),
+            ]),
 
             'ownership'    => 'required|in:Centro,Personal',
             'type'         => 'required|in:Portátil,Proyector,Router,Switch,Impresora,Otro',
@@ -46,4 +50,6 @@ class UpdateAssetRequest extends FormRequest
         ];
     }
 }
+
+
 

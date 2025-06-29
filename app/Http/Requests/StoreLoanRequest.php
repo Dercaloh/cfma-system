@@ -17,31 +17,35 @@ class StoreLoanRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user() !== null;
-     }
+    }
 
     public function rules(): array
     {
         $start = $this->start_date ?? now()->format('Y-m-d');
 
-        return [
-            'asset_id' => ['required', 'exists:assets,id'],
-            'start_date' => [
-                'required', 'date',
-                'after_or_equal:today',
-                'before_or_equal:' . now()->addDays(3)->format('Y-m-d')
-            ],
-            'end_date' => [
-                'required', 'date',
-                'after_or_equal:start_date',
-                'before_or_equal:' . Carbon::parse($start)->addDays(1)->format('Y-m-d')
-            ],
-            'delivery_hour' => [
-                'required', 'date_format:H:i',
-                'after_or_equal:07:00',
-                'before_or_equal:18:00'
-            ],
-            'notes' => ['nullable', 'string', 'max:1000']
+        $rules = [
+            'asset_id'      => ['required', 'exists:assets,id'],
+            'tipo_de_uso'   => ['required', Rule::in(['formativo', 'administrativo'])],
+            'cantidad'      => ['required', 'integer', 'min:1'],
+            'sede'          => ['required', 'string', 'max:255'],
+            'hora_entrega'  => ['required', 'date_format:H:i', 'after_or_equal:07:00', 'before_or_equal:18:00'],
+            'notes'         => ['nullable', 'string', 'max:1000'],
         ];
+
+        if ($this->tipo_de_uso === 'formativo') {
+            $rules += [
+                'ficha'       => ['required', 'string', 'max:50'],
+                'programa'    => ['required', 'string', 'max:255'],
+                'instructor'  => ['required', 'string', 'max:255'],
+            ];
+        } else {
+            $rules += [
+                'cargo'         => ['required', 'string', 'max:255'],
+                'departamento'  => ['required', 'string', 'max:255'],
+                'proposito'     => ['required', 'string', 'max:500'],
+            ];
+        }
+
+        return $rules;
     }
 }
-

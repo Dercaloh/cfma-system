@@ -18,7 +18,7 @@ class Asset extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'serial_number', 'placa', 'type', 'brand', 'model',
+        'name','serial_number', 'placa', 'type', 'brand', 'model',
         'status', 'condition', 'location',
         'ownership', 'assigned_to', 'loanable', 'movable',
         'description',
@@ -47,5 +47,10 @@ class Asset extends Model
     {
         return $this->hasManyThrough(ExitPass::class, GateLog::class);
     }
+    protected $casts = [
+        'loanable' => 'boolean',
+        'movable'  => 'boolean',
+    ];
+
 }
 

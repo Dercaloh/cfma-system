@@ -1,25 +1,3 @@
-/* File: resources/css/app.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Semántico */
-.btn-sena {
-  @apply bg-sena-verde text-sena-blanco font-semibold py-2 px-4 rounded;
-}
-.btn-sena:hover {
-  @apply bg-sena-verde-sec;
-}
-/* Agrega a tu hoja base de estilos */
-.hidden { display: none; }
-/* Efecto glass para tarjetas */
-.glass-effect {
-    backdrop-filter: blur(10px);
-    background-color: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 1rem;
-}
 /* File: resources/css/prestamos.css */
 .glass-card {
     background: rgba(255, 255, 255, 0.25);

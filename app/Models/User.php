@@ -57,5 +57,18 @@ class User extends Authenticatable
     {
         return $this->hasMany(AuditLog::class);
     }
+
+    /**
+     * Verifica si el usuario tiene un rol específico
+     *
+     * @param string $roleName Nombre del rol a verificar
+     * @return bool
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role && $this->role->name === $roleName;
+    }
+
+
 }
 

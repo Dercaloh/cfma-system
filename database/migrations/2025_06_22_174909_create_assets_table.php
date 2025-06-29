@@ -16,9 +16,10 @@ return new class extends Migration
     {
         Schema::create('assets', function (Blueprint $table) {
             $table->id();
-
+            $table->string('name'); // Nombre del equipo
             // Identificador único por activo
             $table->string('serial_number')->unique();
+
 
             // Clasificación básica del equipo
             $table->enum('type', [
@@ -35,7 +36,11 @@ return new class extends Migration
             ])->default('Disponible');
 
             $table->text('description')->nullable();
-
+            // Nuevo campo: usuario responsable del activo (cuentadante)
+            $table->foreignId('assigned_to')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
             // Auditoría
             $table->timestamps();        // created_at y updated_at
             $table->softDeletes();       // deleted_at (para no borrar físicamente)

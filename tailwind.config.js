@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['system-ui', 'Figtree', ...defaultTheme.fontFamily.sans],
+        sans: ['"Work Sans"', 'system-ui', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         'sena-verde': '#39A900',
@@ -18,6 +18,9 @@ export default {
         'sena-azul': '#00304D',
         'sena-gris': '#F6F6F6',
         'sena-blanco': '#FFFFFF',
+        'sena-amarillo': '#FDC300',
+        'sena-azul-violeta': '#71277A',
+        'sena-cian': '#50E5F9',
       },
     },
   },

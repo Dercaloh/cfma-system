@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             LoanStatusSeeder::class,
+            LoanSystemSeeder::class,
         ]);
 
         // Usuario de prueba con rol "administrador"

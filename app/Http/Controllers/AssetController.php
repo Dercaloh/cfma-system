@@ -37,8 +37,6 @@ class AssetController extends Controller
 
         return view('inventario.index', compact('assets'));
     }
-
-
     // Formulario de creación de activos
     public function create()
     {
@@ -61,7 +59,7 @@ class AssetController extends Controller
                 ->with('info', 'Ya existe un activo eliminado con ese serial. ¿Deseas restaurarlo?');
         }
 
-    // 2. Si no existe, ahora sí lo creamos
+        // 2. Si no existe, ahora sí lo creamos
         Asset::create($data);
 
         return redirect()
@@ -70,11 +68,11 @@ class AssetController extends Controller
 
 
 
-    Asset::create($data);
+        Asset::create($data);
 
-    return redirect()
-        ->route('inventario.index')
-        ->with('success', 'Activo registrado exitosamente.');
+        return redirect()
+            ->route('inventario.index')
+            ->with('success', 'Activo registrado exitosamente.');
 
     }
 // Mostrar detalles de un activo
