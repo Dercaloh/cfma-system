@@ -52,5 +52,10 @@ class Asset extends Model
         'movable'  => 'boolean',
     ];
 
+    public function asset()
+{
+    return $this->belongsTo(Asset::class)->withTrashed();
+}
+
 }
 

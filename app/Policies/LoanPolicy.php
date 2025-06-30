@@ -12,12 +12,15 @@ class LoanPolicy
      * - el usuario tiene asignado el activo (cuentadante/receptor),
      * - el usuario tiene un rol con privilegios (subdirector o admin).
      */
-    public function view(User $user, Loan $loan): bool
+   public function view(User $user, Loan $loan): bool
     {
-        return $user->id === $loan->user_id
-            || ($loan->asset && $loan->asset->assigned_to === $user->id)
-            || in_array($user->role?->name, ['subdirector', 'admin']);
+        $isSolicitante = $user->id === $loan->user_id;
+        $isCuentadante = $loan->asset && $loan->asset->assigned_to === $user->id;
+        $isAutorizado = in_array($user->role?->name, ['subdirector', 'administrador']); // nota: en la tabla es 'administrador', no 'admin'
+
+        return $isSolicitante || $isCuentadante || $isAutorizado;
     }
+
 
     /**
      * Permite aprobar un préstamo si:
@@ -25,10 +28,13 @@ class LoanPolicy
      * - el usuario es el cuentadante del activo (receptor).
      */
     public function approve(User $user, Loan $loan): bool
-    {
-        return $loan->status?->name === 'solicitado'
-            && $loan->asset?->assigned_to === $user->id;
-    }
+{
+    return $loan->status?->name === 'solicitado' && (
+        $loan->asset?->assigned_to === $user->id ||
+        in_array($user->role?->name, ['subdirector', 'administrador'])
+    );
+}
+
 
     /**
      * Permite registrar la entrega si:

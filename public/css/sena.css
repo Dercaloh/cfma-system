@@ -1,106 +1,136 @@
-/* Paleta institucional del SENA */
+/* ====================================================================================
+   SENA - Estilos institucionales (Glassmorphism) - Versión optimizada 2025
+   Basado en Manual Identidad Corporativa SENA 2024
+   Tipografía: Work Sans (preinstalada en public/fonts)
+   ==================================================================================== */
+
+/* --------- Variables de color institucional --------- */
 :root {
-    --sena-verde-principal: #39A900;
-    --sena-verde-secundario: #007832;
-    --sena-azul: #00304D;
-    --sena-morado: #71277A;
-    --sena-celeste: #50E5F9;
-    --sena-amarillo: #FDC300;
-    --sena-gris-claro: #F6F6F6;
-    --sena-blanco: #FFFFFF;
-    --sena-negro: #000000;
+  --sena-verde: #39A900;         /* Verde corporativo */
+  --sena-verde-secundario: #007832;
+  --sena-gris-claro: #F6F6F6;
+  --sena-blanco: #FFFFFF;
+  --sena-negro: #000000;
+  --sena-amarillo: #FDC300;
+  --sena-cyan: #50E5F9;
+  --sena-violeta: #71277A;
+  --glass-blur: blur(16px);
 }
 
-/* Tipografía institucional */
+/* --------- Tipografía --------- */
 body {
-    font-family: 'Work Sans', 'Calibri', sans-serif;
-    margin: 0;
-    background-color: var(--sena-gris-claro);
-    color: var(--sena-azul);
-    line-height: 1.6;
+  font-family: 'WorkSans', system-ui, sans-serif;
+  background-color: var(--sena-gris-claro);
+  color: #111;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
-/* Contenedor central */
-.container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 15px;
+/* --------- Utilidades Glassmorphism --------- */
+.glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
-/* Encabezado y pie de página */
-header,
-footer {
-    padding: 15px 0;
+.glass-btn {
+  background-color: var(--sena-verde);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(57, 169, 0, 0.3);
+  transition: background 0.3s ease;
 }
 
-header {
-    background-color: var(--sena-verde-principal);
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 20px;
+.glass-btn:hover {
+  background-color: #2e8c00;
 }
 
-footer {
-    background-color: var(--sena-azul);
-    color: white;
-    text-align: center;
-    font-size: 0.9rem;
+/* --------- Estilo de títulos institucionales --------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'WorkSans', sans-serif;
+  font-weight: 700;
+  color: var(--sena-verde);
+  margin-bottom: 12px;
 }
 
-/* Tipografía jerárquica */
-h1, h2, h3, h4 {
-    font-weight: 600;
-    color: var(--sena-azul);
+/* --------- Tablas institucionales --------- */
+.table-sena {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: var(--glass-blur);
 }
 
-h1 { font-size: 2rem; }
-h2 { font-size: 1.75rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
+.table-sena th,
+.table-sena td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
 
-/* Botón institucional */
+.table-sena thead {
+  background-color: var(--sena-verde);
+  color: white;
+}
+
+/* --------- Botones secundarios --------- */
 .btn-sena {
-    background-color: var(--sena-verde-principal);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-weight: 600;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  background-color: var(--sena-verde);
+  color: white;
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+  text-decoration: none;
 }
 
-.btn-sena:hover,
-.btn-sena:focus {
-    background-color: var(--sena-verde-secundario);
-    outline: none;
+.btn-sena:hover {
+  background-color: #2d8b00;
 }
 
-/* Utilidades generales */
-.text-center {
-    text-align: center;
+/* --------- Formularios --------- */
+.form-input {
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid #ccc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  width: 100%;
+  font-size: 15px;
+  color: #111;
 }
 
-.mt-1 { margin-top: 1rem; }
-.mb-1 { margin-bottom: 1rem; }
-.p-1  { padding: 1rem; }
-
-.bg-white {
-    background-color: var(--sena-blanco);
+.form-input:focus {
+  border-color: var(--sena-verde);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(57, 169, 0, 0.3);
 }
 
-.rounded {
-    border-radius: 8px;
+/* --------- Etiquetas de estado --------- */
+.status-tag {
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
 }
 
-.shadow {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+.status-solicitado { background-color: #FFFAE6; color: #A67C00; }
+.status-aprobado   { background-color: #E6FFEB; color: #1A7F37; }
+.status-entregado  { background-color: #E6F7FF; color: #005B96; }
+.status-devuelto   { background-color: #F3E6FF; color: #71277A; }
 
-/* Accesibilidad: enfoque visible */
-:focus-visible {
-    outline: 3px solid var(--sena-celeste);
-    outline-offset: 2px;
+/* --------- Footer institucional --------- */
+.footer-sena {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 12px;
+  color: #666;
 }

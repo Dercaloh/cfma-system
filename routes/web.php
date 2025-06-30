@@ -58,6 +58,8 @@ Route::middleware('auth')->group(function () {
 | Gestión de préstamos
 |--------------------------------------------------------------------------
 */
+
+
 // Solo quienes pueden solicitar
 Route::middleware(['auth', 'role:instructor,subdirector,supervisor,administrador'])->group(function () {
     Route::get('/prestamos/solicitar', [LoanController::class, 'create'])->name('prestamos.solicitar');
@@ -66,6 +68,7 @@ Route::middleware(['auth', 'role:instructor,subdirector,supervisor,administrador
 // Acciones disponibles para todos los autenticados
 Route::middleware('auth')->group(function () {
     Route::resource('/prestamos', LoanController::class)->names('prestamos');
+    Route::get('/prestamos/{loan}/debug', [LoanController::class, 'show'])->name('prestamos.debug');
     Route::post('/prestamos/{loan}/aprobar', [LoanController::class, 'approve'])->name('prestamos.aprobar');
     Route::post('/prestamos/{loan}/entregar', [LoanController::class, 'checkOut'])->name('prestamos.entregar');
     Route::post('/prestamos/{loan}/devolver', [LoanController::class, 'checkIn'])->name('prestamos.devolver');
@@ -96,7 +99,7 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::resource('/inventario', AssetController::class)
         ->names('inventario')
         ->parameters(['inventario' => 'asset']);
-
+    Route::get('/inventario', [AssetController::class, 'index'])->name('inventario.index');
     Route::get('/inventario/{asset}/eliminar', [AssetController::class, 'destroy'])->name('inventario.confirmDelete');
     Route::delete('/inventario/{asset}/eliminar', [AssetController::class, 'deleteConfirm'])->name('inventario.deleteConfirm');
     Route::get('/inventario/{id}/restaurar-confirmacion', [AssetController::class, 'confirmRestore'])->name('inventario.confirmRestore');

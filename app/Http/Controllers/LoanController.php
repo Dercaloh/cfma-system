@@ -20,7 +20,7 @@ class LoanController extends Controller
     }
 
     /**
-     * Devuelve el ID del estado de préstamo dado su nombre.
+     * Devuelve el ID de un estado por nombre.
      */
     protected function getStatusId(string $name): ?int
     {
@@ -28,18 +28,20 @@ class LoanController extends Controller
     }
 
     /**
-     * Lista todos los préstamos según el rol.
+     * Vista principal de préstamos.
      */
     public function index(Request $request)
     {
         $user = $request->user();
 
-        $query = Loan::with(['asset', 'status', 'user'])->orderByDesc('created_at');
+        $query = Loan::with(['asset', 'status', 'user'])->latest();
 
-        if ($user->role->name === 'instructor') {
+        // Filtrar si es instructor
+        if ($user->role?->name === 'instructor') {
             $query->where('user_id', $user->id);
         }
 
+        // Filtro por estado
         if ($request->filled('estado')) {
             $query->whereHas('status', fn($q) => $q->where('name', $request->estado));
         }
@@ -54,18 +56,14 @@ class LoanController extends Controller
      */
     public function create()
     {
-        $prestados = Loan::whereHas('status', fn($q) => $q->where('name', 'entregado'))
-                         ->pluck('asset_id')->toArray();
-
         $assetsDisponibles = Asset::where('status', 'Disponible')
             ->where('loanable', true)
             ->whereNotIn('id', Loan::whereHas('status', fn($q) => $q->where('name', '!=', 'devuelto'))->pluck('asset_id'))
             ->get();
 
-
         $loansActivos = Loan::with(['asset', 'user', 'status'])
             ->whereHas('status', fn($q) => $q->where('name', 'entregado'))
-            ->orderByDesc('delivered_at')
+            ->latest('delivered_at')
             ->get()
             ->map(function ($loan) {
                 $loan->expected_return = optional($loan->delivered_at)?->copy()->addDays(3);
@@ -77,25 +75,30 @@ class LoanController extends Controller
     }
 
     /**
-     * Registra una nueva solicitud de préstamo.
+     * Guarda una nueva solicitud de préstamo.
      */
     public function store(StoreLoanRequest $request)
     {
-        $user = $request->user();
-
-        $activoOcupado = Loan::where('asset_id', $request->asset_id)
-            ->whereHas('status', fn($q) => $q->where('name', '!=', 'devuelto'))
-            ->exists();
-
-        if ($activoOcupado) {
-            return back()->with('error', 'Este activo ya tiene un préstamo activo.');
-        }
-
-        DB::beginTransaction();
-
         try {
+            $userId = $request->user()?->id;
+
+            if (!$userId) {
+                return back()->with('error', 'No se pudo identificar al usuario.');
+            }
+
+            // Validar que no esté en préstamo actual
+            $activoOcupado = Loan::where('asset_id', $request->asset_id)
+                ->whereHas('status', fn($q) => $q->where('name', '!=', 'devuelto'))
+                ->exists();
+
+            if ($activoOcupado) {
+                return back()->with('error', 'Este activo ya tiene un préstamo activo.');
+            }
+
+            DB::beginTransaction();
+
             $loan = Loan::create([
-                'user_id'      => $user->id,
+                'user_id'      => $userId,
                 'asset_id'     => $request->asset_id,
                 'status_id'    => $this->getStatusId('solicitado'),
                 'requested_at' => now(),
@@ -103,15 +106,16 @@ class LoanController extends Controller
             ]);
 
             $loan->details()->create($request->only([
-                'tipo_de_uso', 'ficha', 'programa', 'instructor', 'cargo',
-                'departamento', 'proposito', 'sede', 'hora_entrega', 'cantidad'
+                'tipo_de_uso', 'ficha', 'programa', 'instructor',
+                'cargo', 'departamento', 'proposito', 'sede',
+                'hora_entrega', 'cantidad'
             ]));
 
             DB::commit();
 
-            return redirect()->route('prestamos.index')->with('success', 'Solicitud de préstamo registrada.');
+            return redirect()->route('prestamos.index')->with('success', 'Solicitud registrada correctamente.');
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             report($e);
             return back()->with('error', 'Error al registrar el préstamo.');
@@ -119,41 +123,68 @@ class LoanController extends Controller
     }
 
     /**
-     * Muestra los detalles de un préstamo.
+     * Detalle del préstamo.
      */
-    public function show(Loan $loan)
-    {
-        $loan->load(['asset', 'user', 'status', 'details', 'signatures.user']);
+public function show($id)
+{
+    try {
+        // ⚠️ Consulta explícita del préstamo con todas las relaciones
+        $loan = Loan::with([
+            'user' => fn($q) => $q->withTrashed(),
+            'asset' => fn($q) => $q->withTrashed(),
+            'status',
+            'details',
+            'signatures.user'
+        ])->findOrFail($id);
 
         $this->authorize('view', $loan);
 
         return view('prestamos.show', compact('loan'));
+
+    } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        return redirect()->route('prestamos.index')->with('error', 'No tienes permiso para ver este préstamo.');
+    } catch (\Throwable $e) {
+        return back()->with('error', 'Error inesperado: ' . $e->getMessage());
     }
+}
+
+
+
+
+
+
 
     /**
      * Aprueba un préstamo.
      */
     public function approve(Loan $loan)
     {
-        $this->authorize('approve', $loan);
+        try {
+            $this->authorize('approve', $loan);
 
-        $loan->update([
-            'status_id'   => $this->getStatusId('aprobado'),
-            'approved_at' => now(),
-        ]);
+            $loan->update([
+                'status_id'   => $this->getStatusId('aprobado'),
+                'approved_at' => now(),
+            ]);
 
-        return back()->with('success', 'Préstamo aprobado.');
+            return back()->with('success', 'Préstamo aprobado correctamente.');
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->with('error', 'Error al aprobar el préstamo.');
+        }
     }
 
     /**
-     * Firma de entrega del activo.
+     * Registrar entrega con firma.
      */
-    public function checkOut(Request $request, Loan $loan)
-    {
+public function checkOut(Request $request, Loan $loan)
+{
+    try {
         $this->authorize('deliver', $loan);
 
-        if ($loan->status->name !== 'aprobado') {
-            return back()->with('error', 'El préstamo no ha sido aprobado.');
+        // ✅ Validación explícita para evitar acceso nulo
+        if (!$loan->status || $loan->status->name !== 'aprobado') {
+            return back()->with('error', 'El préstamo aún no está aprobado.');
         }
 
         $request->validate([
@@ -163,7 +194,7 @@ class LoanController extends Controller
         $path = $request->file('signature')->store('signatures', 'public');
 
         $loan->signatures()->create([
-            'user_id'        => Auth::id(),
+            'user_id'        => Auth::id(), //linea 195
             'type'           => 'entrega',
             'signature_path' => $path,
         ]);
@@ -173,18 +204,25 @@ class LoanController extends Controller
             'delivered_at' => now(),
         ]);
 
-        return back()->with('success', 'Entrega registrada correctamente.');
+        return back()->with('success', 'Entrega registrada.');
+    } catch (\Exception $e) {
+        report($e);
+        return back()->with('error', 'Error al registrar la entrega.');
     }
+}
+
 
     /**
-     * Firma de devolución del activo.
+     * Registrar devolución con firma.
      */
-    public function checkIn(Request $request, Loan $loan)
-    {
+public function checkIn(Request $request, Loan $loan)
+{
+    try {
         $this->authorize('returnAsset', $loan);
 
-        if ($loan->status->name !== 'entregado') {
-            return back()->with('error', 'Este préstamo aún no ha sido entregado.');
+        // ✅ Validación explícita para prevenir error de null
+        if (!$loan->status || $loan->status->name !== 'entregado') {
+            return back()->with('error', 'El préstamo no ha sido entregado todavía.');
         }
 
         $request->validate([
@@ -194,7 +232,7 @@ class LoanController extends Controller
         $path = $request->file('signature')->store('signatures', 'public');
 
         $loan->signatures()->create([
-            'user_id'        => Auth::id(),
+            'user_id'        => Auth::id(), //linea 233
             'type'           => 'devolucion',
             'signature_path' => $path,
         ]);
@@ -204,6 +242,11 @@ class LoanController extends Controller
             'returned_at' => now(),
         ]);
 
-        return back()->with('success', 'Devolución registrada correctamente.');
+        return back()->with('success', 'Devolución registrada.');
+    } catch (\Exception $e) {
+        report($e);
+        return back()->with('error', 'Error al registrar la devolución.');
     }
+}
+
 }

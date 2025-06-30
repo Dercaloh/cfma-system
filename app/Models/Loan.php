@@ -6,17 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-/**
- * Modelo Loan: representa un préstamo de activo.
- *
- * Relaciones:
- * - user(): Usuario solicitante.
- * - asset(): Activo prestado.
- * - status(): Estado actual del préstamo.
- * - details(): Detalles adicionales (uso administrativo o formativo).
- * - signatures(): Firmas registradas en el ciclo de préstamo.
- * - documents(): Documentos adjuntos al préstamo.
- */
 class Loan extends Model
 {
     use HasFactory, SoftDeletes;
@@ -39,20 +28,28 @@ class Loan extends Model
         'returned_at'  => 'datetime',
     ];
 
-    // Relaciones Eloquent
+    // Relaciones con soporte a datos eliminados (soft deletes)
     public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+{
+    return $this->belongsTo(User::class)->withTrashed()->withDefault([
+        'name' => 'Desconocido',
+        'email' => '—'
+    ]);
+}
+
 
     public function asset()
-    {
-        return $this->belongsTo(Asset::class);
-    }
+{
+    return $this->belongsTo(Asset::class)->withTrashed()->withDefault([
+        'name' => 'Activo eliminado',
+    ]);
+}
 
     public function status()
     {
-        return $this->belongsTo(LoanStatus::class);
+        return $this->belongsTo(LoanStatus::class)->withDefault([
+            'name' => 'Desconocido'
+        ]);
     }
 
     public function details()

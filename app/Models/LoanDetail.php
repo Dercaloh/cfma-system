@@ -21,4 +21,9 @@ class LoanDetail extends Model
     {
         return $this->belongsTo(Loan::class);
     }
+
+   public function status()
+{
+    return $this->belongsTo(LoanStatus::class);
+}
 }
