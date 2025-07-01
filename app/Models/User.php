@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+
+use App\Models\Security\UserSecurity;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,51 +13,63 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;
 
-    // Campos que se pueden asignar de forma masiva
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'username',
         'email',
         'password',
         'role_id',
         'employee_id',
+        'department_id',
+        'location_id',
+        // otros campos necesarios según migración...
     ];
 
-    // Campos que deben ocultarse en respuestas JSON
     protected $hidden = [
         'password',
         'remember_token',
+        'mfa_secret',       // legacy en users, ocultar
+        'phone_for_otp',    // legacy en users, ocultar
     ];
 
-    // Casts automáticos para columnas de la base de datos
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'last_password_change_at' => 'datetime',
+        'account_valid_from' => 'date',
+        'account_valid_until' => 'date',
+        'consent_timestamp' => 'datetime',
     ];
 
-    /**
-     * Relación: Un usuario pertenece a un rol
-     *
-     * Esta relación permite acceder a los datos del rol usando:
-     * $user->role->name
-     */
+    // Accesor para full_name (si prefieres acceder como propiedad)
+    public function getFullNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    // Relación con Role
     public function role()
     {
         return $this->belongsTo(Role::class);
     }
 
-    /**
-     * Relación: Un usuario puede tener muchos préstamos
-     */
+    // Relación con préstamos
     public function loans()
     {
         return $this->hasMany(Loan::class);
     }
 
-    /**
-     * Relación: Un usuario puede tener muchos registros de auditoría
-     */
+    // Relación con registros de auditoría
     public function auditLogs()
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    // Relación con seguridad avanzada (MFA)
+    public function security()
+    {
+        return $this->hasOne(UserSecurity::class);
     }
 
     /**
@@ -69,6 +83,19 @@ class User extends Authenticatable
         return $this->role && $this->role->name === $roleName;
     }
 
+    /**
+     * Indica si el MFA está activado para el usuario,
+     * prioriza el valor en tabla user_security, sino usa legacy.
+     *
+     * @return bool
+     */
+    public function isMfaEnabled(): bool
+    {
+        if ($this->security) {
+            return (bool) $this->security->mfa_enabled;
+        }
 
+        // fallback legacy
+        return (bool) $this->mfa_enabled;
+    }
 }
-

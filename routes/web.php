@@ -10,7 +10,9 @@ use App\Http\Controllers\{
     DocumentController,
     LoanController,
     GateController,
-    ExitPassController
+    ExitPassController,
+    UserPolicyController,
+    UserSecurityLogController
 };
 
 /*
@@ -41,6 +43,11 @@ Route::get('/dashboard', function (Request $request) {
         default         => abort(403),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/politicas/aceptar', [UserPolicyController::class, 'store'])->name('politicas.store');
+    Route::post('/seguridad/log', [UserSecurityLogController::class, 'store'])->name('seguridad.log.store');
+});
 
 /*
 |--------------------------------------------------------------------------

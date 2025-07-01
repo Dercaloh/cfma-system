@@ -3,28 +3,57 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Ejecuta todos los seeders registrados.
+     * Sembrador maestro del sistema SGPTI.
+     * Ordenado por dependencias y estructura modular.
      */
     public function run(): void
     {
+        // 🔐 FASE 1: Seguridad y Accesos
         $this->call([
-            RoleSeeder::class,
-            LoanStatusSeeder::class,
-            LoanSystemSeeder::class,
+            RolesTableSeeder::class,
+            PermissionsTableSeeder::class,
+            RolePermissionTableSeeder::class,
+            UsersTableSeeder::class,
         ]);
 
-        // Usuario de prueba con rol "administrador"
-        $admin = User::factory()->create([
-            'name' => 'Administrador CFMA',
-            'email' => 'admin@cfma.local',
-            'password' => Hash::make('admin1234'), // ⚠️ cambiar en producción
-            'role_id' => 1, // Asumiendo que 1 es el rol de administrador
+        // 🏛️ FASE 2: Organización y Catálogos Institucionales
+        $this->call([
+            LocationsTableSeeder::class,
+            DepartmentsTableSeeder::class,
+            BranchesTableSeeder::class,
+            PositionsTableSeeder::class,
+            ProxyTypesTableSeeder::class,
+            ProgramsTableSeeder::class,
+        ]);
+
+        // 💻 FASE 3: Inventario de Activos TIC
+        $this->call([
+            AssetTypesTableSeeder::class,
+            AssetsTableSeeder::class,
+        ]);
+
+        // 🔄 FASE 4: Préstamos y Flujo de Gestión
+        $this->call([
+            LoanStatusesTableSeeder::class,
+            LoansTableSeeder::class,
+            LoanDetailsTableSeeder::class,
+            LoanApprovalsTableSeeder::class,
+            SignaturesTableSeeder::class,
+        ]);
+
+        // 🧾 FASE 5: Soporte Documental y Portería
+        $this->call([
+            GateLogsTableSeeder::class,
+            ExitPassesTableSeeder::class,
+        ]);
+
+        // 📋 FASE 6: Auditoría Interna
+        $this->call([
+            AuditLogsTableSeeder::class,
         ]);
     }
 }
