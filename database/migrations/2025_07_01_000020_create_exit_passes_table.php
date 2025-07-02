@@ -13,9 +13,8 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('gate_log_id')
-                ->constrained('gate_logs')
-                ->cascadeOnDelete()
-                ->index();
+                ->index()
+                ->comment('Registro de entrada/salida relacionado');
 
             $table->string('cuentadante', 100)->comment('Responsable de salida');
             $table->string('cedula', 20)->comment('Documento del cuentadante');
@@ -30,8 +29,6 @@ return new class extends Migration
 
             $table->foreignId('signed_by')
                 ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
                 ->index()
                 ->comment('Usuario que firmó la salida');
 
@@ -43,12 +40,19 @@ return new class extends Migration
                 ->comment('Estado actual del pase');
 
             // Auditoría
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->comment('Creado por');
+            $table->foreignId('updated_by')->nullable()->comment('Actualizado por');
+            $table->foreignId('deleted_by')->nullable()->comment('Eliminado por');
 
             $table->timestamps();
             $table->softDeletes();
+
+            // Claves foráneas explícitas (evita error 121)
+            $table->foreign('gate_log_id', 'fk_exit_gate_log')->references('id')->on('gate_logs')->cascadeOnDelete();
+            $table->foreign('signed_by', 'fk_exit_signed_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('created_by', 'fk_exit_created_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('updated_by', 'fk_exit_updated_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('deleted_by', 'fk_exit_deleted_by')->references('id')->on('users')->nullOnDelete();
         });
     }
 

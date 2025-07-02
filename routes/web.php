@@ -140,6 +140,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/actas/{exitPass}/pdf', [ExitPassController::class, 'generatePDF'])->name('exit_passes.pdf');
 });
 
+
+
 /*
 |--------------------------------------------------------------------------
 | Breeze (Laravel auth)

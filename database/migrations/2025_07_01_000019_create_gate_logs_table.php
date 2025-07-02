@@ -13,15 +13,13 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('asset_id')
-                ->constrained()
-                ->cascadeOnDelete()
-                ->index();
+                ->index()
+                ->comment('Activo asociado al movimiento');
 
             $table->foreignId('user_id')
                 ->nullable()
-                ->constrained('users')
-                ->nullOnDelete()
-                ->index();
+                ->index()
+                ->comment('Usuario que hizo el movimiento');
 
             $table->enum('action', ['salida', 'entrada'])
                 ->comment('Tipo de movimiento');
@@ -31,22 +29,26 @@ return new class extends Migration
                 ->index()
                 ->comment('Fecha y hora del registro');
 
-            $table->text('notes')
-                ->nullable()
-                ->comment('Observaciones del movimiento');
-
+            $table->text('notes')->nullable()->comment('Observaciones del movimiento');
             $table->fullText('notes');
 
             // Auditoría
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('deleted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->comment('Creado por');
+            $table->foreignId('updated_by')->nullable()->comment('Actualizado por');
+            $table->foreignId('deleted_by')->nullable()->comment('Eliminado por');
 
             $table->timestamps();
             $table->softDeletes();
 
-            // Índice para consultas frecuentes
             $table->index(['asset_id', 'logged_at'], 'idx_gate_asset_fecha');
+
+            // Claves foráneas explícitas (evita error 121)
+            $table->foreign('asset_id', 'fk_gate_asset')->references('id')->on('assets')->cascadeOnDelete();
+            $table->foreign('user_id', 'fk_gate_user')->references('id')->on('users')->nullOnDelete();
+
+            $table->foreign('created_by', 'fk_gate_created_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('updated_by', 'fk_gate_updated_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreign('deleted_by', 'fk_gate_deleted_by')->references('id')->on('users')->nullOnDelete();
         });
     }
 
