@@ -9,6 +9,8 @@ return new class extends Migration {
             $table->id();
             $table->string('name', 50)->unique()->comment('Nombre único del tipo de activo (ej. Portátil, Impresora)');
             $table->string('description', 255)->nullable()->comment('Descripción adicional del tipo');
+            $table->boolean('active')->default(true)->index()->comment('Estado lógico del tipo de activo');
+
 
             // Auditoría
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     $this->call(CoreCatalogsSeeder::class);
     $this->call(SecurityUsersSeeder::class);
     $this->call(AssetSeeder::class);
-    $this->call(LoanSeeder::class);
+
 }
 
 

@@ -3,44 +3,77 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Semántico */
-.btn-sena {
-  @apply bg-sena-verde text-sena-blanco font-semibold py-2 px-4 rounded;
-}
-.btn-sena:hover {
-  @apply bg-sena-verde-sec;
-}
-/* Agrega a tu hoja base de estilos */
-.hidden { display: none; }
-/* Efecto glass para tarjetas */
-.glass-effect {
-    backdrop-filter: blur(10px);
-    background-color: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 1rem;
-}
-/* File: resources/css/prestamos.css */
-.glass-card {
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 1rem;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-}
+/* Estilos personalizados */
+@layer components {
+  .glass-card {
+    @apply p-4 border shadow-md backdrop-blur-md bg-white/30 border-white/20 rounded-xl;
+  }
 
-.glass-btn {
-    background-color: rgba(57, 169, 0, 0.75); /* sena-verde */
-    color: #fff;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: background 0.3s ease;
-    backdrop-filter: blur(2px);
-}
+  .glass-btn {
+    @apply px-4 py-2 font-semibold text-white transition rounded-md bg-sena-verde;
+  }
 
-.glass-btn:hover {
-    background-color: rgba(0, 120, 50, 0.85); /* sena-verde-sec */
+  .glass-btn:hover {
+    @apply bg-sena-verde-sec;
+  }
+
+  .privacy-policy {
+    @apply box-border w-full max-w-screen-xl px-6 py-8 mx-auto font-sans text-gray-800 bg-sena-blanco;
+  }
+
+  .privacy-policy p {
+    @apply mb-4 leading-relaxed text-justify;
+  }
+
+  .privacy-policy ul {
+    @apply pl-4 mb-4 list-disc list-inside;
+  }
+
+  .privacy-policy table {
+    @apply w-full mb-6 text-sm text-left border border-gray-300;
+  }
+
+  .privacy-policy th {
+    @apply px-4 py-2 text-white bg-sena-verde;
+  }
+
+  .privacy-policy td {
+    @apply px-4 py-2 text-gray-900 border-t border-gray-300 bg-white/80;
+  }
+
+  .privacy-policy h2 {
+    @apply mt-6 mb-2 text-xl font-bold text-sena-verde;
+  }
+
+  .privacy-policy h3 {
+    @apply mt-4 mb-2 text-lg font-semibold text-sena-azul;
+  }
+
+  .privacy-policy .header {
+    @apply pb-6 mb-8 text-center border-b-4 border-sena-verde;
+  }
+
+  .privacy-policy .header h1 {
+    @apply mb-2 text-2xl font-bold text-sena-azul;
+  }
+
+  .privacy-policy .header h2 {
+    @apply mb-2 text-xl font-semibold text-sena-verde-sec;
+  }
+
+  .legal-notice {
+    @apply p-4 mb-4 border rounded-md shadow-sm bg-white/70 border-sena-verde/20;
+  }
+
+  .consent-summary {
+    @apply p-6 mt-8 border shadow-inner bg-white/80 rounded-xl border-sena-verde/30;
+  }
+
+  .footer {
+    @apply mt-6 text-xs text-center text-gray-600;
+  }
+
+
+
+
 }

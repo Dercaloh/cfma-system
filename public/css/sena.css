@@ -134,3 +134,119 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 12px;
   color: #666;
 }
+/* =============================================================================
+   POLÍTICA DE PRIVACIDAD — CFMA SGPTI
+   ============================================================================= */
+.privacy-policy {
+    font-family: 'Work Sans', system-ui, sans-serif;
+    line-height: 1.6;
+    color: theme('colors.gray.800');
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    background-color: theme('colors.sena-blanco');
+    box-sizing: border-box;
+}
+
+/* Encabezado */
+.privacy-policy .header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid #39A900;
+}
+
+.privacy-policy .header h1 {
+    font-size: 1.75rem; /* 28px */
+    font-weight: 700;
+    color: #00304D;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-policy .header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #007832;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-policy h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #ddd;
+    color: #00304D;
+}
+
+.privacy-policy h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #007832;
+    margin-top: 1.75rem;
+}
+
+/* Tablas */
+.privacy-policy table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+}
+
+.privacy-policy th,
+.privacy-policy td {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.privacy-policy th {
+    background-color: #39A900;
+    color: white;
+    font-weight: 600;
+}
+
+/* Bloques legales */
+.privacy-policy .legal-notice {
+    background-color: #F6F6F6;
+    border-left: 4px solid #39A900;
+    padding: 1rem;
+    margin: 2rem 0;
+    font-size: 0.95rem;
+}
+
+/* Bloque resumen de consentimiento */
+.privacy-policy .consent-summary {
+    background-color: #f0fff0;
+    border: 1px solid #39A900;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0.5rem;
+}
+
+/* Pie de página */
+.privacy-policy .footer {
+    margin-top: 3rem;
+    font-size: 0.875rem;
+    color: #666;
+    text-align: center;
+    padding-top: 1.25rem;
+    border-top: 1px solid #eee;
+}
+
+.privacy-policy a {
+    color: #007832;
+    text-decoration: underline;
+}
+
+.privacy-policy ul {
+    list-style: disc;
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.privacy-policy p {
+    margin-top: 0.5rem;
+}

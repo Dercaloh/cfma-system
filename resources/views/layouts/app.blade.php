@@ -1,4 +1,3 @@
-{{-- resources/views/layouts/app.blade.php --}}
 @props(['header'])
 
 <!DOCTYPE html>
@@ -9,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- Carga de recursos principales vía Vite --}}
+    {{-- Recursos principales via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     {{-- Tipografía institucional --}}
@@ -20,6 +19,7 @@
     <link rel="stylesheet" href="{{ asset('css/prestamos.css') }}">
     @stack('styles')
 </head>
+
 <body class="min-h-screen flex flex-col font-sans text-gray-900 bg-gradient-to-br from-white via-white/70 to-white/50 backdrop-blur-xl">
 
     {{-- Encabezado institucional con Glassmorphism --}}
@@ -34,43 +34,56 @@
 
     {{-- Barra de navegación institucional dinámica por rol --}}
     @auth
-    <nav class="bg-sena-verde text-white shadow-sm backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center text-sm">
-            <div class="flex flex-wrap gap-4 font-medium">
-                <a href="{{ route('dashboard') }}" class="hover:underline">Inicio</a>
-                <a href="{{ route('profile.edit') }}" class="hover:underline">Perfil</a>
+        @php
+            $role = Auth::user()->role->name ?? '';
+            $level = Auth::user()->role->level ?? 99; // Por defecto un nivel alto para evitar mostrar accesos
+        @endphp
 
-                @php $role = Auth::user()->role->name ?? ''; @endphp
+        <nav class="bg-sena-verde text-white shadow-sm backdrop-blur-md">
+            <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center text-sm">
+                <div class="flex flex-wrap gap-4 font-medium">
 
-                @if ($role === 'administrador')
-                    <a href="{{ route('inventario.index') }}" class="hover:underline">Inventario</a>
-                    <a href="{{ route('admin.dashboard') }}" class="hover:underline">Panel Admin</a>
-                @elseif ($role === 'subdirector')
-                    <a href="{{ route('prestamos.aprobar') }}" class="hover:underline">Aprobar Préstamos</a>
-                @elseif ($role === 'supervisor')
-                    <a href="{{ route('supervisor.dashboard') }}" class="hover:underline">Supervisión</a>
-                @elseif ($role === 'portería')
-                    <a href="{{ route('prestamos.checkin') }}" class="hover:underline">Check-In</a>
-                    <a href="{{ route('prestamos.checkout') }}" class="hover:underline">Check-Out</a>
-                @endif
+                    {{-- Accesos comunes --}}
+                    <a href="{{ route('dashboard') }}" class="hover:underline">Inicio</a>
+                    <a href="{{ route('profile.edit') }}" class="hover:underline">Perfil</a>
 
-                @if (in_array($role, ['administrador', 'subdirector', 'supervisor', 'instructor']))
-                    <a href="{{ route('prestamos.index') }}" class="hover:underline">Préstamos</a>
-                @endif
+                    {{-- Accesos por nivel de rol --}}
+                    @if ($level <= 0) {{-- Administrador --}}
+                        <a href="{{ route('inventario.index') }}" class="hover:underline">Inventario</a>
+                        <a href="{{ route('admin.dashboard') }}" class="hover:underline">Panel Admin</a>
+                    @endif
+
+                    @if ($level <= 1) {{-- Subdirector --}}
+                        <a href="{{ route('prestamos.aprobar') }}" class="hover:underline">Aprobar Préstamos</a>
+                    @endif
+
+                    @if ($level <= 2) {{-- Coordinador o Supervisor --}}
+                        <a href="{{ route('supervisor.dashboard') }}" class="hover:underline">Supervisión</a>
+                    @endif
+
+                    @if ($level == 4) {{-- Portería --}}
+                        <a href="{{ route('prestamos.checkin') }}" class="hover:underline">Check-In</a>
+                        <a href="{{ route('prestamos.checkout') }}" class="hover:underline">Check-Out</a>
+                    @endif
+
+                    @if (in_array($level, [0, 1, 2, 3])) {{-- Administrativos y docentes --}}
+                        <a href="{{ route('prestamos.index') }}" class="hover:underline">Préstamos</a>
+                    @endif
+
+                </div>
+
+                {{-- Usuario autenticado + logout --}}
+                <div class="flex items-center gap-3 text-white/90">
+                    <span>{{ Auth::user()->name }}</span>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-xs">
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
             </div>
-
-            {{-- Usuario autenticado + logout --}}
-            <div class="flex items-center gap-3 text-white/90">
-                <span>{{ Auth::user()->name }}</span>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-xs">
-                        Cerrar sesión
-                    </button>
-                </form>
-            </div>
-        </div>
-    </nav>
+        </nav>
     @endauth
 
     {{-- Encabezado contextual --}}

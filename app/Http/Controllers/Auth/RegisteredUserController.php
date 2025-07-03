@@ -11,13 +11,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use App\Models\Role;
-use App\Providers\RouteServiceProvider;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Muestra el formulario de registro.
      */
     public function create(): View
     {
@@ -25,27 +23,37 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Maneja la solicitud de registro entrante.
      */
     public function store(Request $request): RedirectResponse
     {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
-    ]);
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
 
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password), // ✅ aseguramos hash seguro
-        'role_id' => Role::where('name', 'instructor')->value('id'), // ✅ asignación segura de rol
-    ]);
+        // Separar nombre completo en nombres y apellidos
+        $nameParts = explode(' ', trim($request->name), 2);
+        $firstName = $nameParts[0];
+        $lastName = $nameParts[1] ?? '';
 
-    Auth::login($user);
+        $user = User::create([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'username' => strtolower(preg_replace('/\s+/', '.', $firstName.'.'.$lastName)),
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role_id' => 8, // Aprendiz por defecto
+            'status' => 'activo',
+            'account_valid_from' => now(),
+            'consent_data_processing' => true,
+        ]);
 
-    return redirect('/dashboard');
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect(route('dashboard', absolute: false));
     }
 }

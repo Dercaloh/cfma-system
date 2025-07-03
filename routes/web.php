@@ -12,7 +12,8 @@ use App\Http\Controllers\{
     GateController,
     ExitPassController,
     UserPolicyController,
-    UserSecurityLogController
+    UserSecurityLogController,
+    RegistroController
 };
 
 /*
@@ -25,36 +26,42 @@ Route::get('/', function () {
         ? redirect()->route('dashboard')
         : view('welcome');
 })->name('home');
+Route::get('/politica-privacidad', function () {
+    return view('legal.privacy-policy');
+})->name('legal.privacy');
+
 
 /*
 |--------------------------------------------------------------------------
-| Redirección dinámica tras login
+| Redirección dinámica tras login según rol
 |--------------------------------------------------------------------------
 */
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
+    $role = $user->role?->name;
 
-    return match ($user->role->name) {
-        'administrador' => redirect()->route('admin.dashboard'),
-        'subdirector'   => redirect()->route('subdirector.dashboard'),
-        'supervisor'    => redirect()->route('supervisor.dashboard'),
-        'instructor'    => redirect()->route('instructor.dashboard'),
-        'portería'      => redirect()->route('porteria.dashboard'),
-        default         => abort(403),
+    return match ($role) {
+        'Administrador'       => redirect()->route('admin.dashboard'),
+        'Subdirector'         => redirect()->route('subdirector.dashboard'),
+        'Coordinador'         => redirect()->route('coordinador.dashboard'),
+        'Funcionario'         => redirect()->route('funcionario.dashboard'),
+        'Portería'            => redirect()->route('porteria.dashboard'),
+        'Aprendiz'            => redirect()->route('aprendiz.dashboard'),
+        'Vocero'              => redirect()->route('vocero.dashboard'),
+        'Vocero Suplente'     => redirect()->route('vocero.dashboard'),
+        default               => abort(403, 'Rol no autorizado.')
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth'])->group(function () {
-    Route::post('/politicas/aceptar', [UserPolicyController::class, 'store'])->name('politicas.store');
-    Route::post('/seguridad/log', [UserSecurityLogController::class, 'store'])->name('seguridad.log.store');
-});
-
 /*
 |--------------------------------------------------------------------------
-| Perfil de usuario
+| Rutas comunes para todos los autenticados
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
+    Route::post('/politicas/aceptar', [UserPolicyController::class, 'store'])->name('politicas.store');
+    Route::post('/seguridad/log', [UserSecurityLogController::class, 'store'])->name('seguridad.log.store');
+
     Route::get('/perfil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/perfil', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -62,17 +69,18 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Gestión de préstamos
+| Solicitud de préstamos: Aprendiz, Funcionario, Vocero, Vocero Suplente
 |--------------------------------------------------------------------------
 */
-
-
-// Solo quienes pueden solicitar
-Route::middleware(['auth', 'role:instructor,subdirector,supervisor,administrador'])->group(function () {
+Route::middleware(['auth', 'role:Aprendiz,Funcionario,Vocero,Vocero Suplente'])->group(function () {
     Route::get('/prestamos/solicitar', [LoanController::class, 'create'])->name('prestamos.solicitar');
 });
 
-// Acciones disponibles para todos los autenticados
+/*
+|--------------------------------------------------------------------------
+| Gestión de préstamos para todos los roles autenticados
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
     Route::resource('/prestamos', LoanController::class)->names('prestamos');
     Route::get('/prestamos/{loan}/debug', [LoanController::class, 'show'])->name('prestamos.debug');
@@ -83,30 +91,26 @@ Route::middleware('auth')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Módulo de portería
+| Portería
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:portería'])->group(function () {
+Route::middleware(['auth', 'role:Portería'])->group(function () {
     Route::view('/porteria/dashboard', 'porteria.dashboard')->name('porteria.dashboard');
-    Route::view('/porteria/checkin', 'prestamos.checkin')->name('porteria.checkin');      // Renombrado
-    Route::view('/porteria/checkout', 'prestamos.checkout')->name('porteria.checkout');   // Renombrado
+    Route::view('/porteria/checkin', 'prestamos.checkin')->name('porteria.checkin');
+    Route::view('/porteria/checkout', 'prestamos.checkout')->name('porteria.checkout');
 
     Route::post('/porteria/{asset}/registro', [GateController::class, 'log'])->name('porteria.registro');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Rutas por Rol
+| Panel por Rol (Dashboards)
 |--------------------------------------------------------------------------
 */
-// ADMINISTRADOR
-Route::middleware(['auth', 'role:administrador'])->group(function () {
+Route::middleware(['auth', 'role:Administrador'])->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
 
-    Route::resource('/inventario', AssetController::class)
-        ->names('inventario')
-        ->parameters(['inventario' => 'asset']);
-    Route::get('/inventario', [AssetController::class, 'index'])->name('inventario.index');
+    Route::resource('/inventario', AssetController::class)->names('inventario')->parameters(['inventario' => 'asset']);
     Route::get('/inventario/{asset}/eliminar', [AssetController::class, 'destroy'])->name('inventario.confirmDelete');
     Route::delete('/inventario/{asset}/eliminar', [AssetController::class, 'deleteConfirm'])->name('inventario.deleteConfirm');
     Route::get('/inventario/{id}/restaurar-confirmacion', [AssetController::class, 'confirmRestore'])->name('inventario.confirmRestore');
@@ -114,25 +118,26 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     Route::post('/inventario/{asset}/documentos', [DocumentController::class, 'store'])->name('documentos.store');
 });
 
-// SUBDIRECTOR
-Route::middleware(['auth', 'role:subdirector'])->group(function () {
+Route::middleware(['auth', 'role:Subdirector'])->group(function () {
     Route::view('/subdirector/dashboard', 'subdirector.dashboard')->name('subdirector.dashboard');
     Route::view('/prestamos/aprobar', 'prestamos.aprobar')->name('prestamos.aprobar');
 });
 
-// SUPERVISOR
-Route::middleware(['auth', 'role:supervisor'])->group(function () {
-    Route::view('/supervisor/dashboard', 'supervisor.dashboard')->name('supervisor.dashboard');
+Route::middleware(['auth', 'role:Coordinador'])->group(function () {
+    Route::view('/coordinador/dashboard', 'coordinador.dashboard')->name('coordinador.dashboard');
 });
 
-// INSTRUCTOR
-Route::middleware(['auth', 'role:instructor'])->group(function () {
-    Route::view('/instructor/dashboard', 'instructor.dashboard')->name('instructor.dashboard');
+Route::middleware(['auth', 'role:Funcionario'])->group(function () {
+    Route::view('/funcionario/dashboard', 'funcionario.dashboard')->name('funcionario.dashboard');
+});
+
+Route::middleware(['auth', 'role:Aprendiz,Vocero,Vocero Suplente'])->group(function () {
+    Route::view('/aprendiz/dashboard', 'aprendiz.dashboard')->name('aprendiz.dashboard');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Actas (Exit Pass)
+| Actas (Pases de salida)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
@@ -140,11 +145,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/actas/{exitPass}/pdf', [ExitPassController::class, 'generatePDF'])->name('exit_passes.pdf');
 });
 
-
-
 /*
 |--------------------------------------------------------------------------
-| Breeze (Laravel auth)
+| Breeze (Laravel Breeze auth)
 |--------------------------------------------------------------------------
 */
 require __DIR__ . '/auth.php';

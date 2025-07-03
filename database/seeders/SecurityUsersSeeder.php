@@ -95,7 +95,7 @@ class SecurityUsersSeeder extends Seeder
                     'location_id' => $location?->id,
                     'department_id' => $department?->id,
                     'status' => 'activo',
-                    'data_processing_consent' => true,
+                    'consent_data_processing' => true,
                     'email_verified_at' => $now,
                     'created_by' => $adminId,
                     'updated_by' => $adminId,

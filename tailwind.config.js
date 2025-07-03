@@ -7,6 +7,23 @@ export default {
     './resources/views/**/*.blade.php',
     './resources/js/**/*.js',
   ],
+  safelist: [
+    'privacy-policy',
+    'header',
+    'legal-notice',
+    'consent-summary',
+    'footer',
+    'text-sena-verde',
+    'text-sena-azul',
+    'text-sena-verde-sec',
+    'bg-sena-blanco',
+    'bg-white/70',
+    'bg-white/80',
+    'border-sena-verde',
+    'border-sena-verde/30',
+    'border-sena-verde/20',
+    'shadow-inner',
+  ],
   theme: {
     extend: {
       fontFamily: {

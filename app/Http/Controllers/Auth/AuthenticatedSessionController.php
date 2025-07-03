@@ -22,25 +22,14 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    /**
- * @param \Illuminate\Http\Request|\Illuminate\Foundation\Auth\User|null $request
- */
-public function store(LoginRequest $request): RedirectResponse
-{
-    $request->authenticate();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
 
-    $request->session()->regenerate();
-
-    /** @var \App\Models\User|null $user */
-    $user = $request->user();
-
-    if ($user) {
-        logger('Usuario autenticado:', ['id' => $user->id]);
-    }
+        $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
-
 
     /**
      * Destroy an authenticated session.
