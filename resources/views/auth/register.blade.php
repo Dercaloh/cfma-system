@@ -2,60 +2,61 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
-        <!-- Full Name -->
+        {{-- Nombre completo --}}
         <div>
             <x-input-label for="name" :value="__('Nombre completo')" />
-            <x-text-input id="name" class="block w-full mt-1" type="text" name="name" required autofocus
-                autocomplete="name" />
+            <x-text-input id="name" class="block w-full mt-1" type="text" name="name" :value="old('name')" required autofocus />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
-        <!-- Email Address -->
+        {{-- Correo electrónico --}}
         <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block w-full mt-1" type="email" name="email" :value="old('email')"
-                required autocomplete="username" />
+            <x-input-label for="email" :value="__('Correo electrónico')" />
+            <x-text-input id="email" class="block w-full mt-1" type="email" name="email" :value="old('email')" required />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
+        {{-- Contraseña --}}
         <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block w-full mt-1" type="password" name="password" required
-                autocomplete="new-password" />
-
+            <x-input-label for="password" :value="__('Contraseña')" />
+            <x-text-input id="password" class="block w-full mt-1" type="password" name="password" required />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Confirm Password -->
+        {{-- Confirmación --}}
         <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block w-full mt-1" type="password"
-                name="password_confirmation" required autocomplete="new-password" />
-
+            <x-input-label for="password_confirmation" :value="__('Confirmar contraseña')" />
+            <x-text-input id="password_confirmation" class="block w-full mt-1" type="password" name="password_confirmation" required />
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
-        <!-- Consentimiento -->
-        <div class="mt-4">
-            <label class="flex items-center">
-                <input type="checkbox" name="accept_terms" required
-                    class="text-indigo-600 border-gray-300 rounded shadow-sm focus:ring-indigo-500" />
-                <span class="text-sm text-gray-600 ms-2">Acepto el <a href="/politica-privacidad"
-                        class="underline">el tratamiento de datos personales según lo establecido</a>.</span>
-            </label>
-            <x-input-error :messages="$errors->get('accept_terms')" class="mt-2" />
-        </div>
-        <div class="flex items-center justify-end mt-4">
-            <a class="text-sm text-gray-600 underline rounded-md hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+
+        {{-- Consentimiento legal institucional --}}
+        <x-fields.policy-consent-checkbox name="accept_terms" version="1.0.0" />
+
+        {{-- Botón de registro --}}
+        <div class="flex items-center justify-end mt-6">
+            <a href="{{ route('login') }}" class="text-sm text-gray-600 underline hover:text-gray-900">
+                ¿Ya tienes cuenta?
             </a>
 
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
+            <x-primary-button class="ms-4" id="submit-btn" disabled>
+                Registrarme
             </x-primary-button>
         </div>
     </form>
+
+    {{-- JS: Activar botón solo si se acepta política --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkbox = document.getElementById('accept_terms');
+            const button = document.getElementById('submit-btn');
+
+            if (checkbox && button) {
+                checkbox.addEventListener('change', function () {
+                    button.disabled = !this.checked;
+                    button.classList.toggle('opacity-50', !this.checked);
+                });
+            }
+        });
+    </script>
 </x-guest-layout>

@@ -1,3 +1,5 @@
+{{-- nav-link.blade.php --}}
+{{-- This file defines a reusable navigation link component with active state styling --}}
 @props(['active'])
 
 @php

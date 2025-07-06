@@ -1,113 +1,40 @@
+{{-- layouts/base.blade.php --}}
 @props(['header'])
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'SGPTI — SENA CFMA')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    {{-- Recursos principales via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Tipografía institucional --}}
     <link rel="preload" as="font" href="{{ asset('fonts/WorkSans-Regular.ttf') }}" type="font/ttf" crossorigin>
-
-    {{-- Estilos personalizados --}}
-    <link rel="stylesheet" href="{{ asset('css/sena.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/prestamos.css') }}">
     @stack('styles')
 </head>
+<body class="flex flex-col min-h-screen font-sans text-gray-900 bg-gradient-to-br from-white via-white/70 to-white/50 backdrop-blur-xl">
 
-<body class="min-h-screen flex flex-col font-sans text-gray-900 bg-gradient-to-br from-white via-white/70 to-white/50 backdrop-blur-xl">
+    {{-- Encabezado institucional --}}
+    <x-layout.header />
 
-    {{-- Encabezado institucional con Glassmorphism --}}
-    <header class="backdrop-blur bg-white/70 shadow-md border-b border-sena-verde/30">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <img src="{{ asset('img/logo-sena-cfma.png') }}" alt="Logo SENA" class="h-14 w-auto">
-                <h1 class="text-2xl font-extrabold text-sena-verde drop-shadow">SGPTI — Gestión de Activos TI</h1>
-            </div>
-        </div>
-    </header>
-
-    {{-- Barra de navegación institucional dinámica por rol --}}
-    @auth
-        @php
-            $role = Auth::user()->role->name ?? '';
-            $level = Auth::user()->role->level ?? 99; // Por defecto un nivel alto para evitar mostrar accesos
-        @endphp
-
-        <nav class="bg-sena-verde text-white shadow-sm backdrop-blur-md">
-            <div class="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center text-sm">
-                <div class="flex flex-wrap gap-4 font-medium">
-
-                    {{-- Accesos comunes --}}
-                    <a href="{{ route('dashboard') }}" class="hover:underline">Inicio</a>
-                    <a href="{{ route('profile.edit') }}" class="hover:underline">Perfil</a>
-
-                    {{-- Accesos por nivel de rol --}}
-                    @if ($level <= 0) {{-- Administrador --}}
-                        <a href="{{ route('inventario.index') }}" class="hover:underline">Inventario</a>
-                        <a href="{{ route('admin.dashboard') }}" class="hover:underline">Panel Admin</a>
-                    @endif
-
-                    @if ($level <= 1) {{-- Subdirector --}}
-                        <a href="{{ route('prestamos.aprobar') }}" class="hover:underline">Aprobar Préstamos</a>
-                    @endif
-
-                    @if ($level <= 2) {{-- Coordinador o Supervisor --}}
-                        <a href="{{ route('supervisor.dashboard') }}" class="hover:underline">Supervisión</a>
-                    @endif
-
-                    @if ($level == 4) {{-- Portería --}}
-                        <a href="{{ route('prestamos.checkin') }}" class="hover:underline">Check-In</a>
-                        <a href="{{ route('prestamos.checkout') }}" class="hover:underline">Check-Out</a>
-                    @endif
-
-                    @if (in_array($level, [0, 1, 2, 3])) {{-- Administrativos y docentes --}}
-                        <a href="{{ route('prestamos.index') }}" class="hover:underline">Préstamos</a>
-                    @endif
-
-                </div>
-
-                {{-- Usuario autenticado + logout --}}
-                <div class="flex items-center gap-3 text-white/90">
-                    <span>{{ Auth::user()->name }}</span>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/20 rounded text-xs">
-                            Cerrar sesión
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </nav>
-    @endauth
+    {{-- Menú de navegación ya existente --}}
+    <x-nav.nav-menu />
 
     {{-- Encabezado contextual --}}
     @if (!empty($header))
-        <section class="bg-white/60 backdrop-blur-md border-b border-sena-verde/20 shadow-inner">
-            <div class="max-w-7xl mx-auto px-6 py-6">
-                {{ $header }}
-            </div>
-        </section>
+        <x-layout.context-header>
+            {{ $header }}
+        </x-layout.context-header>
     @endif
 
-    {{-- Contenido principal dinámico --}}
-    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow">
+    {{-- Contenido dinámico --}}
+    <main class="flex-grow px-6 py-8 mx-auto max-w-7xl">
         {{ $slot }}
     </main>
 
     {{-- Pie institucional --}}
-    <footer class="bg-sena-azul text-white text-sm mt-auto shadow-inner backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-6 py-5 text-center">
-            <p class="font-semibold">Centro de Formación Minero Ambiental - SENA</p>
-            <p class="mt-1 text-white/90">&copy; {{ date('Y') }} — Desarrollado por Harold Antonio Cordero Solera (Dercaloh)</p>
-            <p class="text-white/70">Todos los derechos reservados</p>
-        </div>
-    </footer>
+    <x-layout.footer />
 
     @stack('scripts')
 </body>

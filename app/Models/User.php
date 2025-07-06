@@ -2,100 +2,164 @@
 
 namespace App\Models;
 
-
-use App\Models\Security\UserSecurity;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Traits\CausesActivity;
+use App\Models\Security\UserSecurity;
+use App\Models\UserPolicy;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, HasRoles, LogsActivity, CausesActivity, \App\Traits\NormalizesTextFields;
 
+    /**
+     * Campos que se pueden asignar masivamente
+     */
     protected $fillable = [
         'first_name',
         'last_name',
         'username',
         'email',
         'password',
-        'role_id',
         'employee_id',
         'department_id',
         'location_id',
-        // otros campos necesarios según migración...
+        'status',
+        'job_title',
+        'account_valid_from',
+        'account_valid_until',
+        'consent_data_processing',
+        'consent_marketing',
+        'consent_data_sharing',
+        'consent_timestamp',
+        'privacy_policy_version',
+        'mfa_enabled',
     ];
 
+    /**
+     * Campos sensibles ocultos al serializar
+     */
     protected $hidden = [
         'password',
         'remember_token',
-        'mfa_secret',       // legacy en users, ocultar
-        'phone_for_otp',    // legacy en users, ocultar
+        'mfa_secret', // legacy
+        'phone_for_otp', // legacy
+        'device_info_encrypted',
     ];
 
+    /**
+     * Conversión de tipos
+     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
         'last_password_change_at' => 'datetime',
         'account_valid_from' => 'date',
         'account_valid_until' => 'date',
+        'consent_data_processing' => 'boolean',
+        'consent_marketing' => 'boolean',
+        'consent_data_sharing' => 'boolean',
         'consent_timestamp' => 'datetime',
+        'mfa_enabled' => 'boolean',
     ];
 
-    // Accesor para full_name (si prefieres acceder como propiedad)
+    /**
+     * Campos a normalizar con el trait personalizado
+     */
+    protected static $normalizeTextFields = ['first_name', 'last_name'];
+
+    /**
+     * Accesor: Nombre completo del usuario
+     */
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    // Relación con Role
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    // Relación con préstamos
+    /**
+     * Relación: Préstamos hechos por el usuario
+     */
     public function loans()
     {
         return $this->hasMany(Loan::class);
     }
 
-    // Relación con registros de auditoría
-    public function auditLogs()
-    {
-        return $this->hasMany(AuditLog::class);
-    }
-
-    // Relación con seguridad avanzada (MFA)
+    /**
+     * Relación: Logs de seguridad
+     */
     public function security()
     {
         return $this->hasOne(UserSecurity::class);
     }
 
     /**
-     * Verifica si el usuario tiene un rol específico
-     *
-     * @param string $roleName Nombre del rol a verificar
-     * @return bool
+     * Relación: Políticas aceptadas por el usuario
      */
-    public function hasRole(string $roleName): bool
+    public function policies()
     {
-        return $this->role && $this->role->name === $roleName;
+        return $this->hasMany(UserPolicy::class);
     }
 
     /**
-     * Indica si el MFA está activado para el usuario,
-     * prioriza el valor en tabla user_security, sino usa legacy.
-     *
-     * @return bool
+     * Relación: Última política aceptada
+     */
+    public function latestPolicy(string $name): ?UserPolicy
+    {
+        return $this->policies()
+            ->where('policy_name', $name)
+            ->latest('accepted_at')
+            ->first();
+    }
+
+    /**
+     * Verifica si el MFA está activo
      */
     public function isMfaEnabled(): bool
     {
-        if ($this->security) {
-            return (bool) $this->security->mfa_enabled;
-        }
+        return $this->security ? (bool) $this->security->mfa_enabled : (bool) $this->mfa_enabled;
+    }
 
-        // fallback legacy
-        return (bool) $this->mfa_enabled;
+    /**
+     * Acceso al primer rol asignado
+     */
+    public function getRoleAttribute()
+    {
+        return $this->roles()->first();
+    }
+
+    /**
+     * Relaciones adicionales
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
+
+    /**
+     * Spatie Activitylog: Personaliza el nombre mostrado en la bitácora
+     */
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->logOnly(['first_name', 'last_name', 'email'])
+            ->useLogName('usuarios')
+            ->setDescriptionForEvent(fn(string $eventName) => "El usuario {$this->full_name} fue {$eventName}");
+    }
+
+    /**
+     * Para mostrar nombre legible en la auditoría (Spatie)
+     */
+    public function __toString(): string
+    {
+        return $this->full_name;
     }
 }

@@ -1,30 +1,50 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    <meta charset="utf-8">
+    <title>{{ config('app.name', 'SGPTI — SENA CFMA') }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    {{-- Tipografía institucional --}}
+    <link rel="preload" as="font" href="{{ asset('fonts/WorkSans-Regular.ttf') }}" type="font/ttf" crossorigin>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    {{-- Estilos y scripts --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased text-gray-900">
-        <div class="flex flex-col items-center min-h-screen pt-6 bg-gray-100 sm:justify-center sm:pt-0">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 text-gray-500 fill-current" />
-                </a>
-            </div>
+    {{-- Estilos adicionales --}}
+    <link rel="stylesheet" href="{{ asset('css/sena.css') }}">
+    @stack('styles')
+</head>
 
-            <div class="w-full px-6 py-4 mt-6 overflow-hidden bg-white shadow-md sm:max-w-md sm:rounded-lg">
-                {{ $slot }}
+<body class="font-sans antialiased text-gray-900 bg-gradient-to-br from-white via-white/60 to-white/40 backdrop-blur">
+
+    {{-- Encabezado institucional --}}
+    <header class="border-b shadow-md backdrop-blur bg-white/70 border-sena-verde/30">
+        <div class="flex items-center justify-center px-6 py-4 mx-auto max-w-7xl">
+            <div class="flex items-center gap-4">
+                <img src="{{ asset('img/logo-sena-cfma.png') }}" alt="Logo SENA" class="w-auto h-14">
+                <h1 class="text-xl font-bold text-sena-verde drop-shadow-sm">SGPTI — Gestión de Activos TI</h1>
             </div>
         </div>
-    </body>
+    </header>
+
+    {{-- Contenedor del formulario (Glass Card) --}}
+    <main class="flex items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md glass-card">
+            {{ $slot }}
+        </div>
+    </main>
+
+    {{-- Pie institucional --}}
+    <footer class="mt-auto text-sm text-white shadow-inner bg-sena-azul backdrop-blur-md">
+        <div class="px-6 py-5 mx-auto text-center max-w-7xl">
+            <p class="font-semibold">Centro de Formación Minero Ambiental - SENA</p>
+            <p class="mt-1 text-white/90">&copy; {{ date('Y') }} — Desarrollado por Harold Antonio Cordero Solera (Dercaloh)</p>
+            <p class="text-white/70">Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    @stack('scripts')
+</body>
 </html>

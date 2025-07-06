@@ -8,13 +8,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Location extends Model
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes, HasFactory, \App\Traits\NormalizesTextFields;
 
     protected $fillable = [
-        'name', 'description', 'active',
-        'created_by', 'updated_by', 'deleted_by',
+        'name',
+        'description',
+        'active',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
-
+    protected static $normalizeTextFields = ['name'];
     protected $casts = [
         'active' => 'boolean',
     ];

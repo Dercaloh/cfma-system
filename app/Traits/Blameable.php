@@ -24,7 +24,18 @@ trait Blameable
         static::deleting(function ($model) {
             if (Auth::check() && $model->usesSoftDeletes()) {
                 $model->deleted_by = Auth::id();
-                $model->saveQuietly(); // evita disparar eventos nuevamente
+                $model->saveQuietly(); // evita loops
+            }
+        });
+
+        // Opcional: auditar manualmente sin duplicar con LogsActivity
+        static::created(function ($model) {
+            if (Auth::check() && ! method_exists($model, 'getActivitylogOptions')) {
+                activity()
+                    ->performedOn($model)
+                    ->causedBy(Auth::user())
+                    ->withProperties(['evento' => 'creado manual'])
+                    ->log(class_basename($model) . ' creado');
             }
         });
     }
