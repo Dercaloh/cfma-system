@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Department;
-use App\Models\Location;
+use App\Models\Branch;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -14,6 +14,7 @@ use App\Http\Requests\Usuarios\StoreUsuarioRequest;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
+use App\Models\Position;
 
 class UsuarioController extends Controller
 {
@@ -31,11 +32,17 @@ class UsuarioController extends Controller
     public function create()
     {
         return view('usuarios.create', [
-            'departments' => Department::where('active', true)->get(),
-            'locations'   => Location::where('active', true)->get(),
-            'roles'       => Role::all(),
+            'departments'    => Department::where('active', true)->orderBy('name')->get(),
+            'branches'       => Branch::where('active', true)->orderBy('name')->get(),
+            'locations'      => [], // se cargan por AJAX
+            'positions'      => Position::where('active', true)->orderBy('title')->get(),
+            'roles'          => Role::orderBy('name')->get(),
+            'editableRoles'  => true
         ]);
     }
+
+
+
 
     // Almacena un nuevo usuario
     public function store(StoreUsuarioRequest $request)
