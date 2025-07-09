@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\UserPolicy;
-use App\Models\PolicyView;
+use App\Models\Policies\PolicyView;
+use App\Models\Policies\UserPolicy;
 
 class UserPolicyController extends Controller
 {

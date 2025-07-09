@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Usuarios;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Role;
-use App\Models\Department;
-use App\Models\Branch;
+use App\Models\Users\User;
+use App\Models\AccessControl\Role;
+use App\Models\Locations\Department;
+use App\Models\Locations\Branch;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ use App\Http\Requests\Usuarios\StoreUsuarioRequest;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
-use App\Models\Position;
+use App\Models\Programs\Position;
 
 class UsuarioController extends Controller
 {
