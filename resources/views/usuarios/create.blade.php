@@ -9,7 +9,9 @@
             @csrf
 
             {{-- Pasamos una instancia vacía de User para evitar errores --}}
-            @include('usuarios.partials.form', ['user' => new \App\Models\User()])
+            @include('usuarios.partials.form', ['user' => new \App\Models\Users\User()])
+
+
 
             <div class="flex items-center justify-start pt-4 space-x-4">
                 <x-buttons.primary-button>
