@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web\Policy;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Policies\PolicyView;
 use App\Models\Policies\UserPolicy;
+use App\Http\Controllers\Controller;
 
 class UserPolicyController extends Controller
 {

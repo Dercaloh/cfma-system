@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\{Loan, User};
-
+use App\Models\Users\User;
+use App\Models\Loans\Loan;
 class LoanPolicy
 {
     /**

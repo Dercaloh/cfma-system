@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Loans;
 
-use App\Models\{Loan, Asset, User, Signature, GateLog, LoanStatus};
+use App\Models\Loans\Loan;
+use App\Models\Loans\LoanStatus;
+use App\Models\Assets\Asset;
 use App\Http\Requests\StoreLoanRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

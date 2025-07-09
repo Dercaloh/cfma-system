@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Document;
-use App\Models\User;
+use App\Models\Documents\Document;
+use App\Models\Users\User;
 use Illuminate\Auth\Access\Response;
 
 class DocumentPolicy

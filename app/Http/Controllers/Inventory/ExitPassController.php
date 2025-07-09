@@ -1,14 +1,14 @@
 <?php
 /// app/Http/Controllers/ExitPassController.php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Inventory;
 
-
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use App\Models\ExitPass;
+use App\Models\Assets\ExitPass;
 
 class ExitPassController extends Controller
 {

@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Asset;
-use App\Models\User;
+use App\Models\Assets\Asset\Asset;
+use App\Models\Users\User;
 use Illuminate\Auth\Access\Response;
 
 class AssetPolicy
