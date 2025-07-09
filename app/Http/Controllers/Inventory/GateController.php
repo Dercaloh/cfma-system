@@ -1,12 +1,14 @@
 <?php
 // GateController.php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Inventory;
 
-use App\Models\Asset;
-use App\Models\GateLog;
-use App\Models\ExitPass;
+use App\Models\Assets\Asset;
+use App\Models\Assets\ExitPass;
+use App\Models\Assets\GateLog;
+use App\Models\AccessControl\UserSecurityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class GateController extends Controller
 {

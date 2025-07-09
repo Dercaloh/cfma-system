@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Security;
 
 use Illuminate\Http\Request;
-use App\Models\UserSecurityLog;
+use App\Models\AccessControl\UserSecurityLog;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class UserSecurityLogController extends Controller
 {

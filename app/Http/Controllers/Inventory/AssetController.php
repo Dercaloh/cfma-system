@@ -1,8 +1,9 @@
 <?php
 /*-- app/Http/Controllers/AssetController.php */
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Inventory;
 
-use App\Models\Asset;
+use App\Http\Controllers\Controller;
+use App\Models\Assets\Asset;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;

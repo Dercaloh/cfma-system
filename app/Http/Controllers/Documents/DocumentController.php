@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Documents;
 
-use App\Models\Asset;
+use App\Http\Controllers\Controller;
+use App\Models\Assets\Asset;
 use Illuminate\Http\Request;
 
 class DocumentController extends Controller

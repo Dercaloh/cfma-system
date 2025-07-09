@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
-use App\Models\User;
+use App\Models\Users\User;
 use Spatie\Permission\Models\Role;
 
 class AuditoriaController extends Controller

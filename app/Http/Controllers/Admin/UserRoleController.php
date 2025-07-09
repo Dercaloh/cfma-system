@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Department;
-use App\Models\Position;
+use App\Models\Users\User;
+use App\Models\Locations\Department;
+use App\Models\Programs\Position;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\AccessControl\Role;
+use App\Models\AccessControl\Permission;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserRoleController extends Controller
