@@ -49,7 +49,8 @@
                             data.locations.forEach(loc => {
                                 const option = document.createElement('option');
                                 option.value = loc.id;
-                                option.textContent = `${loc.name} (${loc.code ?? 'Sin código'})`;
+                                option.textContent = loc.name;
+
                                 locationSelect.appendChild(option);
                             });
                         } else {

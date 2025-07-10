@@ -14,7 +14,7 @@ use Spatie\Activitylog\LogOptions;
 
 use App\Helpers\CryptoHelper;
 
-// ✅ Importaciones según estructura limpia
+// Importaciones según estructura limpia
 use App\Models\Locations\Department;
 use App\Models\Locations\Branch;
 use App\Models\Locations\Location;
@@ -28,21 +28,24 @@ class User extends Authenticatable
 
     /**
      * 🟢 Información Pública (visible institucionalmente)
+     * 🟡 Información Pública Clasificada (uso interno)
+     * 🔴 Información Pública Reservada (solo en hidden)
      */
     protected $fillable = [
         'first_name',
         'last_name',
         'email',
         'username',
+        'password',            // ← AÑADIDO: para poder persistir la contraseña
         'employee_id',
         'job_title',
         'department_id',
         'branch_id',
         'location_id',
+        'document_type',
+        'identification_number',
 
-        /**
-         * 🟡 Información Pública Clasificada (uso interno)
-         */
+        // Campos de uso interno
         'status',
         'account_valid_from',
         'account_valid_until',
@@ -61,7 +64,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * 🔴 Información Pública Reservada
+     * 🔴 Campos ocultos en serialización
      */
     protected $hidden = [
         'password',
@@ -71,6 +74,9 @@ class User extends Authenticatable
         'device_info_encrypted',
     ];
 
+    /**
+     * 🔢 Casts de atributos
+     */
     protected $casts = [
         'email_verified_at'        => 'datetime',
         'last_login_at'            => 'datetime',
@@ -84,6 +90,9 @@ class User extends Authenticatable
         'mfa_enabled'              => 'boolean',
     ];
 
+    /**
+     * 🔤 Campos que normalizamos al guardar
+     */
     protected static $normalizeTextFields = ['first_name', 'last_name'];
 
     /**
@@ -95,7 +104,7 @@ class User extends Authenticatable
     }
 
     /**
-     * 🔐 Desencriptado de campos sensibles
+     * 🔐 Desencriptado de campos sensibles (MFA, teléfono, device info)
      */
     public function getMfaSecretAttribute($value): ?string
     {
@@ -146,23 +155,28 @@ class User extends Authenticatable
     }
 
     /**
-     * 🕒 Última política aceptada por nombre
+     * 🕒 Obtener última política aceptada por nombre
      */
     public function latestPolicy(string $name): ?UserPolicy
     {
-        return $this->policies()->where('policy_name', $name)->latest('accepted_at')->first();
+        return $this->policies()
+                    ->where('policy_name', $name)
+                    ->latest('accepted_at')
+                    ->first();
     }
 
     /**
-     * ✅ MFA habilitado
+     * ✅ Verifica si MFA está habilitado
      */
     public function isMfaEnabled(): bool
     {
-        return $this->security ? (bool) $this->security->mfa_enabled : (bool) $this->mfa_enabled;
+        return $this->security
+            ? (bool) $this->security->mfa_enabled
+            : (bool) $this->mfa_enabled;
     }
 
     /**
-     * 🔘 Rol visible en interfaz
+     * 🔘 Retorna el primer rol asignado (para interfaz)
      */
     public function getRoleAttribute()
     {
@@ -177,11 +191,13 @@ class User extends Authenticatable
         return LogOptions::defaults()
             ->logOnly(['first_name', 'last_name', 'email', 'status'])
             ->useLogName('usuarios')
-            ->setDescriptionForEvent(fn(string $eventName) => "El usuario {$this->full_name} fue {$eventName}");
+            ->setDescriptionForEvent(fn(string $eventName) =>
+                "El usuario {$this->full_name} fue {$eventName}"
+            );
     }
 
     /**
-     * 📛 Valor por defecto en toString
+     * 📛 Representación por defecto al convertir a string
      */
     public function __toString(): string
     {

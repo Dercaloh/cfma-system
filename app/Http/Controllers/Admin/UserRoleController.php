@@ -3,112 +3,87 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Users\User;
-use App\Models\Locations\Department;
-use App\Models\Programs\Position;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\AccessControl\Role;
 use App\Models\AccessControl\Permission;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserRoleController extends Controller
 {
     /**
-     * Muestra listado paginado de usuarios con sus roles/permisos.
+     * Listado paginado de roles.
+     * Vista: resources/views/roles/index.blade.php
      */
     public function index()
     {
-        $this->authorize('viewAny', User::class); // Política de acceso granular
+        // 1. Autorización (p. ej. Gate o Policy de Role)
+        $this->authorize('viewAny', Role::class);
 
-        $users = User::with(['roles', 'permissions', 'department', 'location'])
-            ->orderBy('last_name')
+        // 2. Obtener roles con paginación
+        $roles = Role::with('permissions')
+            ->orderBy('level')
             ->paginate(10);
 
-        activity('gestión de roles y permisos')
+        // 3. Auditoría
+        activity('gestión de roles')
             ->causedBy(Auth::user())
-            ->log('Visualizó listado de usuarios con sus roles y permisos.');
+            ->log('Visualizó listado de roles.');
 
-        return view('admin.users.index', compact('users'));
+        // 4. Retornar la vista correcta
+        return view('access_control.roles.index', compact('users'));
     }
 
     /**
-     * Muestra el formulario de edición de roles, permisos, área y cargo.
+     * Formulario de edición de un rol.
+     * Vista: resources/views/roles/edit.blade.php
      */
-    public function edit(User $user)
+    public function edit(Role $role)
     {
-        $this->authorize('update', $user);
+        $this->authorize('update', $role);
 
-        $roles = Role::orderBy('level')->get();
-        $permissions = Permission::all();
-        $departments = Department::where('active', true)->orderBy('name')->get();
-        $positions = Position::where('active', true)->orderBy('title')->get();
+        // Todos los permisos disponibles
+        $permissions = Permission::orderBy('name')->get();
 
-        return view('admin.users.edit', compact('user', 'roles', 'permissions', 'departments', 'positions'));
+        return view('roles.edit', compact('role', 'permissions'));
     }
 
     /**
-     * Actualiza la asignación de roles, permisos, área y cargo del usuario.
+     * Actualiza nombre, descripción y permisos de un rol.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Role $role)
     {
-        $this->authorize('update', $user);
+        $this->authorize('update', $role);
 
+        // 1. Validar datos
         $data = $request->validate([
-            'department_id'    => 'nullable|exists:departments,id',
-            'position_id'      => 'nullable|exists:positions,id',
-            'new_department'   => 'nullable|string|max:255',
-            'new_position'     => 'nullable|string|max:255',
-            'roles'            => 'nullable|array',
-            'roles.*'          => 'exists:roles,name',
-            'permissions'      => 'nullable|array',
-            'permissions.*'    => 'exists:permissions,name',
+            'name'        => 'required|string|max:50|unique:roles,name,' . $role->id,
+            'description' => 'nullable|string|max:255',
+            'permissions' => 'nullable|array',
+            'permissions.*' => 'exists:permissions,name',
         ]);
 
-        // Asignación de nueva área (departamento)
-        if ($request->filled('new_department')) {
-            $department = Department::create([
-                'name'       => trim($request->new_department),
-                'active'     => true,
-                'created_by' => Auth::id(),
-            ]);
-            $user->department_id = $department->id;
-        } elseif ($request->filled('department_id')) {
-            $user->department_id = $request->department_id;
-        }
+        // 2. Actualizar atributos básicos
+        $role->fill([
+            'name'        => $data['name'],
+            'description' => $data['description'] ?? $role->description,
+        ])->save();
 
-        // Asignación de nuevo cargo
-        if ($request->filled('new_position')) {
-            $position = Position::create([
-                'title'      => trim($request->new_position),
-                'active'     => true,
-                'created_by' => Auth::id(),
-            ]);
-            $user->job_title = $position->title;
-        } elseif ($request->filled('position_id')) {
-            $user->job_title = Position::find($request->position_id)?->title;
-        }
+        // 3. Sincronizar permisos
+        $role->syncPermissions($data['permissions'] ?? []);
 
-        // Asignación de roles y permisos
-        $user->syncRoles($request->input('roles', []));
-        $user->syncPermissions($request->input('permissions', []));
-
-        $user->save();
-
-        // Registro de auditoría con Spatie
-        activity('gestión de roles y permisos')
+        // 4. Auditoría
+        activity('gestión de roles')
             ->causedBy(Auth::user())
-            ->performedOn($user)
+            ->performedOn($role)
             ->withProperties([
-                'roles'        => $request->input('roles', []),
-                'permissions'  => $request->input('permissions', []),
-                'department'   => $user->department?->name,
-                'position'     => $user->job_title,
+                'name'        => $role->name,
+                'permissions' => $role->permissions->pluck('name')->toArray(),
             ])
-            ->log('Actualizó roles, permisos, área y cargo del usuario.');
+            ->log('Actualizó rol y permisos.');
 
+        // 5. Redirigir al listado
         return redirect()
-            ->route('admin.users.index')
-            ->with('success', 'Usuario actualizado correctamente.');
+            ->route('admin.roles.index')
+            ->with('success', 'Rol actualizado correctamente.');
     }
 }
