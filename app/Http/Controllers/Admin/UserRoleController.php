@@ -3,87 +3,76 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Users\User;
 use App\Models\AccessControl\Role;
 use App\Models\AccessControl\Permission;
+use App\Models\Programs\Position;
+use App\Models\Locations\Department; // Asegúrate que esta ruta sea correcta
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class UserRoleController extends Controller
 {
     /**
-     * Listado paginado de roles.
-     * Vista: resources/views/roles/index.blade.php
+     * Muestra listado de usuarios con sus roles y permisos.
      */
     public function index()
     {
-        // 1. Autorización (p. ej. Gate o Policy de Role)
-        $this->authorize('viewAny', Role::class);
+        $this->authorize('viewAny', User::class);
 
-        // 2. Obtener roles con paginación
-        $roles = Role::with('permissions')
-            ->orderBy('level')
+        $users = User::with(['roles', 'permissions', 'department', 'location'])
+            ->orderBy('full_name')
             ->paginate(10);
 
-        // 3. Auditoría
-        activity('gestión de roles')
+        activity('gestión de usuarios y roles')
             ->causedBy(Auth::user())
-            ->log('Visualizó listado de roles.');
+            ->log('Visualizó listado de usuarios con roles y permisos.');
 
-        // 4. Retornar la vista correcta
         return view('access_control.roles.index', compact('users'));
     }
 
     /**
-     * Formulario de edición de un rol.
-     * Vista: resources/views/roles/edit.blade.php
+     * Formulario para editar los roles de un usuario.
      */
-    public function edit(Role $role)
+    public function edit(User $user)
     {
-        $this->authorize('update', $role);
+        $this->authorize('assignRoles', $user);
 
-        // Todos los permisos disponibles
+        $roles = Role::orderBy('level')->get();
         $permissions = Permission::orderBy('name')->get();
-
-        return view('roles.edit', compact('role', 'permissions'));
+        $departments = Department::orderBy('name')->get(); // ← Corregido aquí
+        $positions = Position::orderBy('title')->get();
+        return view('access_control.roles.edit', compact('user', 'roles', 'permissions', 'departments','positions' ));
     }
 
     /**
-     * Actualiza nombre, descripción y permisos de un rol.
+     * Asigna roles y permisos a un usuario.
      */
-    public function update(Request $request, Role $role)
+    public function update(Request $request, User $user)
     {
-        $this->authorize('update', $role);
+        $this->authorize('assignRoles', $user);
 
-        // 1. Validar datos
         $data = $request->validate([
-            'name'        => 'required|string|max:50|unique:roles,name,' . $role->id,
-            'description' => 'nullable|string|max:255',
+            'roles' => 'nullable|array',
+            'roles.*' => 'exists:roles,name',
             'permissions' => 'nullable|array',
             'permissions.*' => 'exists:permissions,name',
         ]);
 
-        // 2. Actualizar atributos básicos
-        $role->fill([
-            'name'        => $data['name'],
-            'description' => $data['description'] ?? $role->description,
-        ])->save();
+        $user->syncRoles($data['roles'] ?? []);
+        $user->syncPermissions($data['permissions'] ?? []);
 
-        // 3. Sincronizar permisos
-        $role->syncPermissions($data['permissions'] ?? []);
-
-        // 4. Auditoría
-        activity('gestión de roles')
+        activity('asignación de roles')
             ->causedBy(Auth::user())
-            ->performedOn($role)
+            ->performedOn($user)
             ->withProperties([
-                'name'        => $role->name,
-                'permissions' => $role->permissions->pluck('name')->toArray(),
+                'roles' => $user->roles->pluck('name')->toArray(),
+                'permissions' => $user->permissions->pluck('name')->toArray(),
             ])
-            ->log('Actualizó rol y permisos.');
+            ->log('Actualizó roles y permisos del usuario.');
 
-        // 5. Redirigir al listado
         return redirect()
-            ->route('admin.roles.index')
-            ->with('success', 'Rol actualizado correctamente.');
+            ->route('admin.users.index')
+            ->with('success', 'Roles y permisos actualizados correctamente.');
     }
 }
