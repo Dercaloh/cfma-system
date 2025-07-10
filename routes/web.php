@@ -18,6 +18,7 @@ use App\Http\Controllers\{
     Security\UserSecurityLogController,
     users\UsuarioController
 };
+use App\Http\Controllers\Web\UbicacionesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -126,6 +127,9 @@ Route::middleware(['auth', 'role:Administrador'])->prefix('admin')->name('admin.
         Route::get('importar', [UsuarioController::class, 'import'])->name('import');
         Route::post('importar', [UsuarioController::class, 'handleImport'])->name('handleImport');
     });
+
+    Route::get('sedes/{branch}/ubicaciones', [UbicacionesController::class, 'porSede'])
+    ->name('sedes.ubicaciones');
 });
 
 /*
