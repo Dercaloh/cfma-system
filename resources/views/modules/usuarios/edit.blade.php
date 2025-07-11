@@ -95,7 +95,7 @@
                         Guardar cambios
                     </x-buttons.primary-button>
 
-                    <a href="{{ route('admin.users.index') }}"
+                    <a href="{{ route('modules.usuarios.index') }}"
                        class="text-sm text-gray-600 underline hover:text-gray-800 focus-visible:outline focus-visible:ring focus-visible:ring-blue-500">
                         Cancelar
                     </a>

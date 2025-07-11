@@ -25,7 +25,7 @@ class UsuarioController extends Controller
             ->orderByDesc('created_at')
             ->paginate(15);
 
-        return view('usuarios.index', compact('users'));
+        return view('modules.usuarios.index', compact('users'));
     }
 
     // 📝 Formulario de creación individual

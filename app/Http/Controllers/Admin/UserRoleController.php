@@ -42,7 +42,7 @@ class UserRoleController extends Controller
         $permissions = Permission::orderBy('name')->get();
         $departments = Department::orderBy('name')->get(); // ← Corregido aquí
         $positions = Position::orderBy('title')->get();
-        return view('access_control.roles.edit', compact('user', 'roles', 'permissions', 'departments','positions' ));
+        return view('modules.usuarios.edit', compact('user', 'roles', 'permissions', 'departments','positions' ));
     }
 
     /**
@@ -72,7 +72,7 @@ class UserRoleController extends Controller
             ->log('Actualizó roles y permisos del usuario.');
 
         return redirect()
-            ->route('admin.users.index')
+            ->route('admin.usuarios.index')
             ->with('success', 'Roles y permisos actualizados correctamente.');
     }
 }
