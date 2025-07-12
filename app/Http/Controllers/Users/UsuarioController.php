@@ -5,15 +5,15 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use App\Models\Users\User;
 use App\Models\AccessControl\Role;
+use App\Models\AccessControl\Permission;
 use App\Models\Locations\Department;
 use App\Models\Locations\Branch;
 use App\Models\Programs\Position;
-use App\Models\AccessControl\Permission;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Users\StoreUsuarioRequest;
 use App\Http\Requests\Users\UpdateUsuarioRequest;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,21 +21,21 @@ use App\Imports\UsersImport;
 
 class UsuarioController extends Controller
 {
-    // 🧾 Vista principal del módulo (listado)
+    // 🧾 Listado de usuarios
     public function index()
     {
         $users = User::with(['roles', 'department', 'location'])
             ->orderByDesc('created_at')
             ->paginate(15);
+
         activity('gestión de usuarios y roles')
             ->causedBy(Auth::user())
             ->log('Visualizó listado de usuarios con roles y permisos.');
 
-
         return view('modules.usuarios.index', compact('users'));
     }
 
-    // 📝 Formulario de creación individual
+    // 📝 Formulario de creación
     public function create()
     {
         return view('modules.usuarios.create', [
@@ -48,48 +48,91 @@ class UsuarioController extends Controller
         ]);
     }
 
-    // 💾 Almacena nuevo usuario
+    // 💾 Guardar usuario nuevo
     public function store(StoreUsuarioRequest $request)
     {
         try {
-            // 1. Generar username único
             $baseUsername = Str::slug($request->first_name . '.' . $request->last_name);
-            $username     = $this->generateUniqueUsername($baseUsername);
+            $username = $this->generateUniqueUsername($baseUsername);
 
-            // 2. Tomar sólo los campos válidos, EXCLUYENDO role y password_confirmation
-            $datos = collect($request->validated())
+            $data = collect($request->validated())
                 ->except(['role', 'password_confirmation'])
                 ->toArray();
 
-            // 3. Hashear y asignar contraseña, y asignar username
-            $datos['password'] = Hash::make($request->password);
-            $datos['username'] = $username;
+            $data['password'] = Hash::make($request->password);
+            $data['username'] = $username;
 
-            // 4. Crear el usuario
-            $user = User::create($datos);
-
-            // 5. Asignar rol
+            $user = User::create($data);
             $user->assignRole($request->role);
 
             return redirect()
                 ->route('admin.usuarios.index')
                 ->with('success', 'Usuario creado correctamente.');
         } catch (\Throwable $e) {
-            Log::error("Error al registrar usuario en UsuarioController@store: {$e->getMessage()}");
-            return back()
-                ->withErrors('Error al registrar usuario. Verifica los datos e inténtalo de nuevo.')
-                ->withInput();
+            Log::error("Error al registrar usuario: {$e->getMessage()}");
+            return back()->withErrors('Error al registrar usuario. Verifica los datos e inténtalo de nuevo.')->withInput();
         }
     }
 
+    // 🔁 Editar usuario
+    public function edit(User $user)
+    {
+        $this->authorize('assignRoles', $user);
 
-    // 📥 Vista de importación
+        $branch = Branch::with('locations')->find($user->branch_id);
+
+        return view('modules.usuarios.edit', [
+            'user'        => $user,
+            'roles'       => Role::orderBy('level')->get(),
+            'permissions' => Permission::orderBy('name')->get(),
+            'departments' => Department::orderBy('name')->get(),
+            'positions'   => Position::orderBy('title')->get(),
+            'branches'    => Branch::orderBy('name')->get(),
+            'locations'   => $branch ? $branch->locations->sortBy('name')->values() : collect(),
+        ]);
+    }
+
+    // ✅ Actualizar usuario
+    public function update(UpdateUsuarioRequest $request, User $user)
+    {
+        $this->authorize('assignRoles', $user);
+
+        $data = $request->validated();
+
+        // 🔒 Actualizar consentimientos booleanos
+        $data['consent_data_sharing'] = $request->has('consent_data_sharing');
+        $data['consent_marketing'] = $request->has('consent_marketing');
+
+        // 🧼 Eliminar campos auxiliares
+        unset($data['new_department'], $data['new_position'], $data['roles'], $data['permissions']);
+
+        $user->update($data);
+
+        $user->syncRoles([$request->input('role')]);
+        $user->syncPermissions($request->input('permissions', []));
+
+        activity('actualización de usuario')
+            ->causedBy(Auth::user())
+            ->performedOn($user)
+            ->withProperties([
+                'usuario_actualizado' => $data,
+                'roles' => $user->roles->pluck('name'),
+                'permisos' => $user->permissions->pluck('name'),
+            ])
+            ->log('Modificó la información general, roles y permisos del usuario.');
+
+        return redirect()
+            ->route('admin.usuarios.index')
+            ->with('success', 'Usuario actualizado correctamente.');
+    }
+
+    // 📥 Vista para importar
     public function import()
     {
         return view('modules.usuarios.import');
     }
 
-    // 📤 Procesamiento del archivo importado
+    // 📤 Procesar archivo importado
     public function handleImport(Request $request)
     {
         $request->validate([
@@ -123,63 +166,5 @@ class UsuarioController extends Controller
         }
 
         return $username;
-    }
-    public function edit(User $user)
-    {
-        $this->authorize('assignRoles', $user);
-
-        // Obtener la sede del usuario
-        $branch = Branch::with('locations')->find($user->branch_id);
-
-        return view('modules.usuarios.edit', [
-            'user'        => $user,
-            'roles'       => Role::orderBy('level')->get(),
-            'permissions' => Permission::orderBy('name')->get(),
-            'departments' => Department::orderBy('name')->get(),
-            'positions'   => Position::orderBy('title')->get(),
-            'branches'    => Branch::orderBy('name')->get(), // 👈 Todas las sedes
-            'locations'   => $branch ? $branch->locations->sortBy('name')->values() : collect(), // 👈 Solo las ubicaciones de la sede del usuario
-        ]);
-    }
-
-
-    /**
-     * Asigna roles y permisos a un usuario.
-     */
-    public function update(UpdateUsuarioRequest $request, User $user)
-    {
-        $this->authorize('assignRoles', $user);
-
-        $data = $request->validated();
-
-        // ✔️ Consentimientos booleanos
-        $data['consent_data_sharing'] = $request->has('consent_data_sharing');
-        $data['consent_marketing']    = $request->has('consent_marketing');
-
-        // 🧼 Eliminar solo campos auxiliares que no existen en la base de datos
-        unset($data['new_department'], $data['new_position'], $data['roles'], $data['permissions']);
-        // ⛔️ Ya no se elimina 'position_id'
-
-        // ✅ Actualizar usuario
-        $user->update($data);
-
-        // 🔐 Actualizar roles y permisos
-        $user->syncRoles([$request->input('role')]);
-        $user->syncPermissions($request->input('permissions', []));
-
-        // 📝 Auditoría
-        activity('actualización de usuario')
-            ->causedBy(Auth::user())
-            ->performedOn($user)
-            ->withProperties([
-                'usuario_actualizado' => $data,
-                'roles'               => $user->roles->pluck('name'),
-                'permisos'            => $user->permissions->pluck('name'),
-            ])
-            ->log('Modificó la información general, roles y permisos del usuario.');
-
-        return redirect()
-            ->route('admin.usuarios.index')
-            ->with('success', 'Usuario actualizado correctamente.');
     }
 }

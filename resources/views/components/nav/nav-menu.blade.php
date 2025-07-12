@@ -10,9 +10,9 @@
     <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
         {{-- Encabezado --}}
-        <div class="flex items-center justify-between py-4">
+        <div class="flex items-center justify-between py-0">
             <div class="text-xl font-bold tracking-wide text-white uppercase drop-shadow">
-                SGPTI – CFMA SENA
+
             </div>
 
             {{-- Hamburguesa para móviles --}}

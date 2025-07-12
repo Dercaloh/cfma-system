@@ -14,10 +14,11 @@ use Spatie\Activitylog\LogOptions;
 
 use App\Helpers\CryptoHelper;
 
-// Importaciones según estructura limpia
+// Relaciones
 use App\Models\Locations\Department;
 use App\Models\Locations\Branch;
 use App\Models\Locations\Location;
+use App\Models\Programs\Position;
 use App\Models\Loans\Loan;
 use App\Models\Policies\UserPolicy;
 use App\Models\AccessControl\UserSecurity;
@@ -26,46 +27,50 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes, HasRoles, LogsActivity, CausesActivity, \App\Traits\NormalizesTextFields;
 
-    /**
-     * 🟢 Información Pública (visible institucionalmente)
-     * 🟡 Información Pública Clasificada (uso interno)
-     * 🔴 Información Pública Reservada (solo en hidden)
-     */
     protected $fillable = [
+        // 🟢 Datos generales
         'first_name',
         'last_name',
-        'email',
         'username',
-        'password',            // ← AÑADIDO: para poder persistir la contraseña
+        'email',
+        'identification_number',
+        'document_type',
+        'phone_number',
+        'personal_email',
+        'institutional_email',
         'employee_id',
-        'job_title',
+
+        // Relaciones
         'department_id',
         'branch_id',
         'location_id',
-        'document_type',
-        'identification_number',
+        'position_id',
 
-        // Campos de uso interno
+        // Seguridad y control de acceso
+        'password',
+        'remember_token',
+        'last_password_change_at',
+        'password_policy_version',
+        'last_login_at',
+        'last_login_ip',
+        'email_verified_at',
+
+        // Estado de cuenta
         'status',
         'account_valid_from',
         'account_valid_until',
-        'last_password_change_at',
-        'last_login_ip',
-        'last_login_at',
-        'password_policy_version',
 
+        // Consentimientos
         'consent_data_processing',
         'consent_marketing',
         'consent_data_sharing',
         'consent_timestamp',
         'privacy_policy_version',
 
+        // Opcional en tu sistema
         'mfa_enabled',
     ];
 
-    /**
-     * 🔴 Campos ocultos en serialización
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -74,9 +79,6 @@ class User extends Authenticatable
         'device_info_encrypted',
     ];
 
-    /**
-     * 🔢 Casts de atributos
-     */
     protected $casts = [
         'email_verified_at'        => 'datetime',
         'last_login_at'            => 'datetime',
@@ -88,24 +90,16 @@ class User extends Authenticatable
         'consent_data_sharing'     => 'boolean',
         'consent_timestamp'        => 'datetime',
         'mfa_enabled'              => 'boolean',
+        'deleted_at'               => 'datetime',
     ];
 
-    /**
-     * 🔤 Campos que normalizamos al guardar
-     */
     protected static $normalizeTextFields = ['first_name', 'last_name'];
 
-    /**
-     * ✅ Nombre completo virtual
-     */
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    /**
-     * 🔐 Desencriptado de campos sensibles (MFA, teléfono, device info)
-     */
     public function getMfaSecretAttribute($value): ?string
     {
         return $value ? CryptoHelper::decrypt($value) : null;
@@ -121,42 +115,16 @@ class User extends Authenticatable
         return $value ? json_decode(CryptoHelper::decrypt($value), true) : null;
     }
 
-    /**
-     * 🔗 Relaciones institucionales
-     */
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
+    // Relaciones
+    public function department()  { return $this->belongsTo(Department::class); }
+    public function branch()      { return $this->belongsTo(Branch::class); }
+    public function location()    { return $this->belongsTo(Location::class); }
+    public function position()    { return $this->belongsTo(Position::class); }
 
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class);
-    }
+    public function loans()       { return $this->hasMany(Loan::class); }
+    public function policies()    { return $this->hasMany(UserPolicy::class); }
+    public function security()    { return $this->hasOne(UserSecurity::class); }
 
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
-    }
-
-    public function loans()
-    {
-        return $this->hasMany(Loan::class);
-    }
-
-    public function policies()
-    {
-        return $this->hasMany(UserPolicy::class);
-    }
-
-    public function security()
-    {
-        return $this->hasOne(UserSecurity::class);
-    }
-
-    /**
-     * 🕒 Obtener última política aceptada por nombre
-     */
     public function latestPolicy(string $name): ?UserPolicy
     {
         return $this->policies()
@@ -165,9 +133,6 @@ class User extends Authenticatable
                     ->first();
     }
 
-    /**
-     * ✅ Verifica si MFA está habilitado
-     */
     public function isMfaEnabled(): bool
     {
         return $this->security
@@ -175,17 +140,11 @@ class User extends Authenticatable
             : (bool) $this->mfa_enabled;
     }
 
-    /**
-     * 🔘 Retorna el primer rol asignado (para interfaz)
-     */
     public function getRoleAttribute()
     {
         return $this->roles()->first();
     }
 
-    /**
-     * 📝 Configuración de auditoría con Spatie
-     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
@@ -196,11 +155,13 @@ class User extends Authenticatable
             );
     }
 
-    /**
-     * 📛 Representación por defecto al convertir a string
-     */
     public function __toString(): string
     {
         return $this->full_name;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'activo';
     }
 }
