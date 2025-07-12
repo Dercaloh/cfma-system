@@ -32,7 +32,7 @@
                              <x-profile.roles-badge-list :roles="$user->roles" />
                          </td>
                          <td class="px-4 py-3 text-center">
-                             <a href="{{ route('admin.users.edit', $user) }}"
+                             <a href="{{ route('admin.usuarios.edit', $user) }}"
                                  class="inline-flex items-center gap-1 text-sm font-semibold rounded-md text-sena-verde hover:underline focus:outline-none focus-visible:ring focus-visible:ring-sena-verde-700"
                                  aria-label="Editar roles del usuario {{ $user->full_name }}">
                                  <x-heroicon-o-pencil class="w-4 h-4" />

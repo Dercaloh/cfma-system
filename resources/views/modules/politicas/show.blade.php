@@ -1,4 +1,4 @@
-{{-- resources/views/politicas/show.blade.php --}}
+{{-- resources/views/modules/politicas/show.blade.php --}}
 @extends('layouts.public')
 
 @section('title', 'Política de Protección de Datos Personales')
