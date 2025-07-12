@@ -22,6 +22,10 @@ use App\Models\Programs\Position;
 use App\Models\Loans\Loan;
 use App\Models\Policies\UserPolicy;
 use App\Models\AccessControl\UserSecurity;
+/**
+ * @method bool hasRole(string|array $roles)
+ * @method bool can(string $permission)
+ */
 
 class User extends Authenticatable
 {

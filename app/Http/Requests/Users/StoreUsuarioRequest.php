@@ -3,85 +3,65 @@
 namespace App\Http\Requests\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class StoreUsuarioRequest extends FormRequest
 {
-    /**
-     * Verifica si el usuario puede realizar esta solicitud.
-     */
     public function authorize(): bool
     {
-        return $this->user()?->hasRole('Administrador');
+        return Auth::check() && Auth::user()->can('crear usuarios');
     }
 
-    /**
-     * Reglas de validación para registrar un nuevo usuario.
-     */
+
     public function rules(): array
     {
         return [
-            // Información personal
-            'first_name'           => ['required', 'string', 'max:50'],
-            'last_name'            => ['required', 'string', 'max:50'],
-
-            // Identificación
-            'document_type'        => ['required', 'in:CC,TI,CE,PA,NIT'],
-            'identification_number'=> ['required', 'string', 'max:20', 'unique:users,identification_number'],
-
-            // Autenticación
-            'email'                => ['required', 'email', 'max:100', 'unique:users,email'],
-            'password'             => ['required', 'string', 'min:8', 'max:100', 'confirmed'],
-
-            // Información institucional
-            'username'             => ['nullable', 'string', 'max:50', 'unique:users,username'], // Se puede generar automáticamente si no se envía
-            'employee_id'          => ['nullable', 'string', 'max:20', 'unique:users,employee_id'],
-            'job_title'            => ['required', 'string', 'max:100'],
-            'phone_number'         => ['nullable', 'string', 'max:20'],
-            'personal_email'       => ['nullable', 'email', 'max:100'],
-            'institutional_email'  => ['nullable', 'email', 'max:100'],
-
-            'department_id'        => ['nullable', 'exists:departments,id'],
-            'branch_id'            => ['nullable', 'exists:branches,id'],
-            'location_id'          => ['nullable', 'exists:locations,id'],
-
-            // Estado y consentimiento
-            'status'               => ['nullable', 'in:activo,inactivo,suspendido,eliminado'],
-            'account_valid_from'   => ['nullable', 'date'],
-            'account_valid_until'  => ['nullable', 'date', 'after_or_equal:account_valid_from'],
-
-            // Roles y control de acceso
-            'role'                 => ['required', 'exists:roles,name'],
-
-            // Permisos individuales
-            'permissions'          => ['nullable', 'array'],
-            'permissions.*'        => ['string', 'exists:permissions,name'],
-
-            // Consentimientos RGPD / Ley 1581
-            'consent_data_processing' => ['nullable', 'boolean'],
-            'consent_marketing'       => ['nullable', 'boolean'],
-            'consent_data_sharing'    => ['nullable', 'boolean'],
+            'first_name'            => ['required', 'string', 'max:50'],
+            'last_name'             => ['required', 'string', 'max:50'],
+            'document_type'         => ['required', 'in:CC,TI,CE,NIT,PAS'],
+            'identification_number' => ['required', 'string', 'max:20', 'unique:users,identification_number'],
+            'institutional_email'   => ['required', 'email', 'max:100', 'unique:users,email'],
+            'personal_email'        => ['nullable', 'email', 'max:100'],
+            'password'              => [$this->isMethod('post') ? 'required' : 'nullable', 'string', 'min:8', 'max:100', 'confirmed'],
+            'department_id'         => ['required', 'exists:departments,id'],
+            'position_id'           => ['required', 'exists:positions,id'],
+            'branch_id'             => ['nullable', 'exists:branches,id'],
+            'location_id'           => ['nullable', 'exists:locations,id'],
+            'role'                  => ['required', 'exists:roles,name'],
         ];
     }
 
-    /**
-     * Mensajes personalizados (accesibles y claros).
-     */
     public function messages(): array
     {
         return [
-            'document_type.required'         => 'El tipo de documento es obligatorio.',
-            'document_type.in'               => 'Seleccione un tipo de documento válido.',
-            'identification_number.required' => 'El número de identificación es obligatorio.',
-            'identification_number.unique'   => 'Este número de identificación ya está registrado.',
-            'email.required'                 => 'El correo electrónico es obligatorio.',
-            'email.email'                    => 'Ingrese un correo válido.',
-            'email.unique'                   => 'Este correo electrónico ya está registrado.',
-            'username.unique'                => 'Este nombre de usuario ya está en uso.',
-            'employee_id.unique'             => 'Este número de ficha o código ya está asignado.',
-            'role.required'                  => 'Debe asignar un rol al usuario.',
-            'role.exists'                    => 'El rol seleccionado no es válido.',
-            'password.confirmed'             => 'La confirmación de contraseña no coincide.',
-            'account_valid_until.after_or_equal' => 'La fecha de finalización debe ser igual o posterior a la de inicio.',
+            'first_name.required'           => 'Los nombres son obligatorios.',
+            'first_name.max'                => 'Los nombres no pueden exceder 50 caracteres.',
+            'last_name.required'            => 'Los apellidos son obligatorios.',
+            'last_name.max'                 => 'Los apellidos no pueden exceder 50 caracteres.',
+            'document_type.required'        => 'El tipo de documento es obligatorio.',
+            'document_type.in'              => 'Seleccione un tipo de documento válido.',
+            'identification_number.required' => 'El número de documento es obligatorio.',
+            'identification_number.max'     => 'El número de documento no puede exceder 20 caracteres.',
+            'identification_number.unique'  => 'Este número de documento ya está registrado.',
+            'institutional_email.required'  => 'El correo institucional es obligatorio.',
+            'institutional_email.email'     => 'Ingrese un correo institucional válido.',
+            'institutional_email.max'       => 'El correo institucional no puede exceder 100 caracteres.',
+            'institutional_email.unique'    => 'Este correo institucional ya está registrado.',
+            'personal_email.email'          => 'Ingrese un correo personal válido.',
+            'personal_email.max'            => 'El correo personal no puede exceder 100 caracteres.',
+            'password.required'             => 'La contraseña es obligatoria para crear un usuario.',
+            'password.min'                  => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max'                  => 'La contraseña no puede exceder 100 caracteres.',
+            'password.confirmed'            => 'La confirmación de contraseña no coincide.',
+            'department_id.required'        => 'Debe seleccionar una dependencia.',
+            'department_id.exists'          => 'La dependencia seleccionada no es válida.',
+            'position_id.required'          => 'Debe seleccionar un cargo.',
+            'position_id.exists'            => 'El cargo seleccionado no es válido.',
+            'branch_id.exists'              => 'La sede seleccionada no es válida.',
+            'location_id.exists'            => 'La ubicación seleccionada no es válida.',
+            'role.required'                 => 'Debe asignar un rol al usuario.',
+            'role.exists'                  => 'El rol seleccionado no es válido.',
         ];
     }
 }

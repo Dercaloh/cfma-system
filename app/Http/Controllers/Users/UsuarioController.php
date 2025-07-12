@@ -57,7 +57,7 @@ class UsuarioController extends Controller
     }
 
     // 💾 Guardar usuario nuevo
-    public function store(StoreUsuarioRequest $request)
+ public function store(StoreUsuarioRequest $request)
     {
         try {
             $baseUsername = Str::slug($request->first_name . '.' . $request->last_name);
@@ -67,6 +67,7 @@ class UsuarioController extends Controller
                 ->except(['role', 'password_confirmation'])
                 ->toArray();
 
+            $data['email'] = $request->institutional_email;
             $data['password'] = Hash::make($request->password);
             $data['username'] = $username;
 
@@ -78,7 +79,9 @@ class UsuarioController extends Controller
                 ->with('success', 'Usuario creado correctamente.');
         } catch (\Throwable $e) {
             Log::error("Error al registrar usuario: {$e->getMessage()}");
-            return back()->withErrors('Error al registrar usuario. Verifica los datos e inténtalo de nuevo.')->withInput();
+            return back()
+                ->withErrors('Error al registrar usuario. Por favor verifique los datos e inténtelo de nuevo.')
+                ->withInput();
         }
     }
 

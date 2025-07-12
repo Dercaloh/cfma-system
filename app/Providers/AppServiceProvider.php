@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
         // Estilo personalizado de paginación y componentes anónimos
         Blade::anonymousComponentNamespace('components.profile', 'profile');
         Paginator::defaultView('vendor.pagination.accessible-tailwind');
-
+        Blade::component('fields.help-icon', 'help-icon');
         // Hook para agregar metadatos a cada evento de auditoría
         Activity::saving(function (Activity $activity) {
             $props = collect($activity->properties ?? []);

@@ -1,7 +1,9 @@
 import './bootstrap';
 
-import Alpine from 'alpinejs';
+import Alpine from 'alpinejs'
+import autocompleteSelect from './components/autocomplete-select.js'
 
-window.Alpine = Alpine;
+Alpine.data('autocompleteSelect', autocompleteSelect)
 
-Alpine.start();
+window.Alpine = Alpine
+Alpine.start()
