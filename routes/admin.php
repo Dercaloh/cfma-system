@@ -26,6 +26,8 @@ Route::middleware(['auth', 'role:Administrador'])
             Route::post('importar', 'handleImport')->name('handleImport'); // Procesamiento
             Route::get('{user}/editar', 'edit')->name('edit'); // Editar usuario
             Route::put('{user}', 'update')->name('update'); // Guardar cambios
+            Route::get('{user}', 'show')->name('show');
+
         });
 
         Route::get('usuarios/export/{format?}', [UserExportController::class, 'export'])->name('usuarios.export');

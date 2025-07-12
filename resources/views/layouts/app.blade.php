@@ -1,4 +1,3 @@
-{{-- layouts/base.blade.php --}}
 @props(['header'])
 
 <!DOCTYPE html>
@@ -13,6 +12,7 @@
     <link rel="preload" as="font" href="{{ asset('fonts/WorkSans-Regular.ttf') }}" type="font/ttf" crossorigin>
     @stack('styles')
 </head>
+
 <body class="flex flex-col min-h-screen font-sans text-gray-900 bg-gradient-to-br from-white via-white/70 to-white/50 backdrop-blur-xl">
 
     {{-- Encabezado institucional --}}
@@ -30,11 +30,16 @@
 
     {{-- Contenido dinámico --}}
     <main class="flex-grow px-6 py-8 mx-auto max-w-7xl">
-        {{ $slot }}
-    </main>
+    <x-security.watermark />
+    {{ $slot }}
+</main>
+
 
     {{-- Pie institucional --}}
     <x-layout.footer />
+
+    {{-- Marca de agua dinámica para desincentivar capturas --}}
+    <x-security.watermark />
 
     @stack('scripts')
 </body>

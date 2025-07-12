@@ -6,7 +6,8 @@
     <section class="p-6 mx-auto space-y-6 max-w-7xl">
         <x-profile.section-card>
             <h2 class="text-xl font-bold text-sena-verde">Información General</h2>
-            <x-usuarios.partials.user-details :user="$user" />
+            @include('modules.usuarios.partials.user-details', ['user' => $user])
+
         </x-profile.section-card>
 
         <x-profile.section-card>

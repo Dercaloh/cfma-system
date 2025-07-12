@@ -19,8 +19,16 @@ use App\Http\Requests\Users\UpdateUsuarioRequest;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
 
+
 class UsuarioController extends Controller
 {
+
+    public function show(User $user)
+    {
+        $this->authorize('view', $user); // Opcional si usas políticas
+        return view('modules.usuarios.show', compact('user'));
+    }
+
     // 🧾 Listado de usuarios
     public function index()
     {
