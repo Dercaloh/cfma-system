@@ -17,7 +17,7 @@ Route::middleware(['auth', 'role:Administrador'])
         // 🧭 Panel de Administración
         Route::get('dashboard', fn() => view('dashboard.admin'))->name('dashboard');
 
-        // 👤 Gestión integral de usuarios (roles, permisos, importación, exportación)
+        // 👤 Gestión integral de usuarios (roles, permisos, importación)
         Route::prefix('usuarios')->name('usuarios.')->controller(UsuarioController::class)->group(function () {
             Route::get('/', 'index')->name('index'); // Listado
             Route::get('crear', 'create')->name('create'); // Formulario
@@ -27,10 +27,12 @@ Route::middleware(['auth', 'role:Administrador'])
             Route::get('{user}/editar', 'edit')->name('edit'); // Editar usuario
             Route::put('{user}', 'update')->name('update'); // Guardar cambios
             Route::get('{user}', 'show')->name('show');
-
         });
 
-        Route::get('usuarios/export/{format?}', [UserExportController::class, 'export'])->name('usuarios.export');
+        // Ruta export fuera del grupo con middleware 'can:exportar usuarios' para evitar 403
+        Route::post('usuarios/export', [UserExportController::class, 'export'])
+            ->name('usuarios.export')
+            ->middleware('can:exportar usuarios');
 
         // 📄 Seguimiento de políticas y consentimiento
         Route::get('politicas/vistas', [PolicyViewController::class, 'index'])->name('policy_views.index');

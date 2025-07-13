@@ -22,17 +22,25 @@ use App\Models\Programs\Position;
 use App\Models\Loans\Loan;
 use App\Models\Policies\UserPolicy;
 use App\Models\AccessControl\UserSecurity;
+
 /**
  * @method bool hasRole(string|array $roles)
  * @method bool can(string $permission)
+ * @property-read \Illuminate\Support\Collection $roles
+ * @property-read \Illuminate\Support\Collection $permissions
  */
-
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes, HasRoles, LogsActivity, CausesActivity, \App\Traits\NormalizesTextFields;
+    use HasFactory,
+        Notifiable,
+        SoftDeletes,
+        HasRoles,             // ← Obligatorio para Spatie
+        LogsActivity,
+        CausesActivity,
+        \App\Traits\NormalizesTextFields;
 
     protected $fillable = [
-        // 🟢 Datos generales
+        // Datos generales
         'first_name',
         'last_name',
         'username',
@@ -50,7 +58,7 @@ class User extends Authenticatable
         'location_id',
         'position_id',
 
-        // Seguridad y control de acceso
+        // Seguridad y control
         'password',
         'remember_token',
         'last_password_change_at',
@@ -71,7 +79,7 @@ class User extends Authenticatable
         'consent_timestamp',
         'privacy_policy_version',
 
-        // Opcional en tu sistema
+        // Opcionales
         'mfa_enabled',
     ];
 
@@ -99,6 +107,8 @@ class User extends Authenticatable
 
     protected static $normalizeTextFields = ['first_name', 'last_name'];
 
+    // ──────── 💡 ACCESSORS ────────
+
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
@@ -119,7 +129,8 @@ class User extends Authenticatable
         return $value ? json_decode(CryptoHelper::decrypt($value), true) : null;
     }
 
-    // Relaciones
+    // ──────── 🔗 RELACIONES ────────
+
     public function department()  { return $this->belongsTo(Department::class); }
     public function branch()      { return $this->belongsTo(Branch::class); }
     public function location()    { return $this->belongsTo(Location::class); }
@@ -128,6 +139,8 @@ class User extends Authenticatable
     public function loans()       { return $this->hasMany(Loan::class); }
     public function policies()    { return $this->hasMany(UserPolicy::class); }
     public function security()    { return $this->hasOne(UserSecurity::class); }
+
+    // ──────── 🔎 MÉTODOS ÚTILES ────────
 
     public function latestPolicy(string $name): ?UserPolicy
     {
@@ -146,7 +159,7 @@ class User extends Authenticatable
 
     public function getRoleAttribute()
     {
-        return $this->roles()->first();
+        return $this->roles()->first(); // Devuelve el primer rol asignado
     }
 
     public function getActivitylogOptions(): LogOptions
