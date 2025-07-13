@@ -2,90 +2,110 @@
 
 namespace App\Models\Locations;
 
-use App\Models\Users\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use App\Traits\NormalizesTextFields;
 
-/**
- * Modelo Department
- *
- * 🔐 Clasificación Institucional:
- * - name: 🟢 Pública
- * - active: 🟢 Pública
- * - created_by / updated_by / deleted_by: 🟡 Clasificada
- * - timestamps: 🟡 Clasificada
- * - deleted_at: 🟡 Clasificada
- */
+use App\Traits\NormalizesTextFields;
+use App\Models\Users\User;
+
 class Department extends Model
 {
     use HasFactory, SoftDeletes, LogsActivity, NormalizesTextFields;
 
+    // Tabla en la BD
     protected $table = 'departments';
 
+    // Sólo estos campos están en tu esquema
     protected $fillable = [
-        'name',         // 🟢 Pública
-        'active',       // 🟢 Pública
-        'created_by',   // 🟡 Clasificada
-        'updated_by',   // 🟡 Clasificada
-        'deleted_by',   // 🟡 Clasificada
+        'name',    // 🟢 Pública
+        'active',  // 🟢 Pública (tinyint(1))
     ];
 
+    // Normaliza el campo 'name'
     protected static $normalizeTextFields = ['name'];
 
+    // Casteo automático
     protected $casts = [
         'active' => 'boolean',
     ];
 
+    // ────────── Relaciones ──────────
+
     /**
-     * 🧾 Relaciones con usuarios para trazabilidad
+     * Usuarios asignados a este departamento
      */
-    public function creator()
+    public function users(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->hasMany(User::class);
     }
 
-    public function updater()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
+    // ────────── Scopes ──────────
 
-    public function deleter()
+    /**
+     * Sólo departamentos activos
+     */
+    public function scopeActive($query)
     {
-        return $this->belongsTo(User::class, 'deleted_by');
+        return $query->where('active', true);
     }
 
     /**
-     * 📝 Auditoría con Spatie Activity Log
+     * Sólo departamentos inactivos
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('active', false);
+    }
+
+    /**
+     * Buscar por nombre
+     */
+    public function scopeSearch($query, string $term)
+    {
+        $term = trim($term);
+        return $query->where('name', 'like', "%{$term}%");
+    }
+
+    // ────────── Accessors & Mutators ──────────
+
+    /**
+     * Nombre capitalizado para presentación
+     */
+    public function getNameAttribute(string $value): string
+    {
+        return ucwords(mb_strtolower($value));
+    }
+
+    // ────────── Auditoría de actividad ──────────
+
+    /**
+     * Nombre del log
      */
     protected static function booted(): void
     {
-        static::creating(fn($model) => $model->logName = 'departments');
-        static::updating(fn($model) => $model->logName = 'departments');
+        static::creating(fn(self $model) => $model->logName = 'departments');
+        static::updating(fn(self $model) => $model->logName = 'departments');
+        static::deleting(fn(self $model) => $model->logName = 'departments');
     }
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'active']) // 🟢 solo campos públicos
             ->useLogName('departments')
-            ->setDescriptionForEvent(fn(string $eventName) => "El departamento fue {$eventName}");
+            ->logOnly(['name', 'active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $event) =>
+                "El departamento “{$this->name}” fue {$event}"
+            );
     }
 
-    /**
-     * 🧾 Accesor: Nombre capitalizado
-     */
-    public function getNameAttribute($value): string
-    {
-        return ucwords(mb_strtolower($value));
-    }
+    // ────────── Representación legible ──────────
 
-    /**
-     * 🧾 Representación legible
-     */
     public function __toString(): string
     {
         return $this->name;

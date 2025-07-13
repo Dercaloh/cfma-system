@@ -10,7 +10,7 @@ class StoreUsuarioRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return Auth::check() && Auth::user()->can('crear usuarios');
+        return true; // La política ya controla el acceso en el controlador
     }
 
 

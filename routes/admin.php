@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\AuditoriaController;
 use App\Http\Controllers\Inventory\AssetController;
 use App\Http\Controllers\Documents\DocumentController;
 use App\Http\Controllers\Web\UbicacionesController;
+use App\Http\Controllers\Users\UsuarioImportController;
+
+// En routes/web.php
 
 Route::middleware(['auth', 'role:Administrador'])
     ->prefix('admin')
@@ -15,24 +18,39 @@ Route::middleware(['auth', 'role:Administrador'])
     ->group(function () {
 
         // 🧭 Panel de Administración
-        Route::get('dashboard', fn() => view('dashboard.admin'))->name('dashboard');
+        Route::view('dashboard', 'dashboard.admin')->name('dashboard');
 
-        // 👤 Gestión integral de usuarios (roles, permisos, importación)
-        Route::prefix('usuarios')->name('usuarios.')->controller(UsuarioController::class)->group(function () {
-            Route::get('/', 'index')->name('index'); // Listado
-            Route::get('crear', 'create')->name('create'); // Formulario
-            Route::post('/', 'store')->name('store'); // Almacenar nuevo
-            Route::get('importar', 'import')->name('import'); // Vista de importación
-            Route::post('importar', 'handleImport')->name('handleImport'); // Procesamiento
-            Route::get('{user}/editar', 'edit')->name('edit'); // Editar usuario
-            Route::put('{user}', 'update')->name('update'); // Guardar cambios
-            Route::get('{user}', 'show')->name('show');
+        // 👤 Gestión integral de usuarios
+        Route::prefix('usuarios')->name('usuarios.')->group(function () {
+
+            // CRUD de usuarios
+            Route::controller(UsuarioController::class)->group(function () {
+                Route::get('/', 'index')->name('index');                // Listado
+                Route::get('crear', 'create')->name('create');          // Formulario
+                Route::post('/', 'store')->name('store');               // Guardar nuevo
+                Route::get('{user}/editar', 'edit')->name('edit');      // Editar usuario
+                Route::put('{user}', 'update')->name('update');         // Actualizar usuario
+                Route::get('{user}', 'show')->name('show');             // Ver detalle
+            });
+
+            // 🧾 Exportación (requiere permiso explícito)
+            Route::post('export', [UserExportController::class, 'export'])
+                ->name('export')
+                ->middleware('can:exportar usuarios');
+
+            // 📥 Importación masiva de usuarios
+            Route::middleware('permission:importar usuarios')
+                ->prefix('importar')
+                ->name('importar.')
+                ->group(function () {
+                    Route::get('/', [UsuarioImportController::class, 'index'])->name('index');
+                    Route::post('/preview', [UsuarioImportController::class, 'preview'])->name('preview');
+                    Route::post('/procesar', [UsuarioImportController::class, 'procesar'])->name('procesar');
+                    Route::get('/historial', [UsuarioImportController::class, 'history'])->name('history');
+                    Route::get('/plantilla', [UsuarioImportController::class, 'downloadTemplate'])->name('plantilla');
+                    Route::post('/cancelar', [UsuarioImportController::class, 'cancelar'])->name('cancelar');
+                });
         });
-
-        // Ruta export fuera del grupo con middleware 'can:exportar usuarios' para evitar 403
-        Route::post('usuarios/export', [UserExportController::class, 'export'])
-            ->name('usuarios.export')
-            ->middleware('can:exportar usuarios');
 
         // 📄 Seguimiento de políticas y consentimiento
         Route::get('politicas/vistas', [PolicyViewController::class, 'index'])->name('policy_views.index');
@@ -45,6 +63,7 @@ Route::middleware(['auth', 'role:Administrador'])
             ->names('inventario')
             ->parameters(['inventario' => 'asset']);
 
+        // Acciones adicionales para inventario
         Route::get('inventario/{asset}/eliminar', [AssetController::class, 'destroy'])->name('inventario.confirmDelete');
         Route::delete('inventario/{asset}/eliminar', [AssetController::class, 'deleteConfirm'])->name('inventario.deleteConfirm');
         Route::get('inventario/{id}/restaurar-confirmacion', [AssetController::class, 'confirmRestore'])->name('inventario.confirmRestore');

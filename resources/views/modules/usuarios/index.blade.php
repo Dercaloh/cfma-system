@@ -8,9 +8,10 @@
             <a href="{{ route('admin.usuarios.create') }}" class="btn-sena">
                 <x-heroicon-o-plus class="w-4 h-4 mr-1" /> Crear Usuario
             </a>
-            <a href="{{ route('admin.usuarios.import') }}" class="bg-white border btn-sena text-sena-verde border-sena-verde hover:bg-sena-gris">
-                <x-heroicon-o-arrow-up-tray class="w-4 h-4 mr-1" /> Importar Excel
-            </a>
+            <a href="{{ route('admin.usuarios.importar.index') }}" class="bg-white border btn-sena text-sena-verde border-sena-verde hover:bg-sena-gris">
+    <x-heroicon-o-arrow-up-tray class="w-4 h-4 mr-1" /> Importar Excel
+</a>
+
         </div>
 
         {{-- Exportar --}}

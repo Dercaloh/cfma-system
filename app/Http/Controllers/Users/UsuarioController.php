@@ -137,33 +137,7 @@ class UsuarioController extends Controller
             ->with('success', 'Usuario actualizado correctamente.');
     }
 
-    // 📥 Vista para importar
-    public function import()
-    {
-        return view('modules.usuarios.import');
-    }
 
-    // 📤 Procesar archivo importado
-    public function handleImport(Request $request)
-    {
-        $request->validate([
-            'file' => ['required', 'file', 'mimes:xlsx,csv']
-        ]);
-
-        try {
-            Excel::import(new UsersImport, $request->file('file'));
-
-            return redirect()
-                ->route('admin.usuarios.index')
-                ->with('success', 'Usuarios importados exitosamente.');
-        } catch (\Throwable $e) {
-            Log::error('Error al importar usuarios: ' . $e->getMessage());
-
-            return back()
-                ->withErrors('Error al importar el archivo. Verifique el formato y vuelva a intentarlo.')
-                ->withInput();
-        }
-    }
 
     // 🔁 Generador único de username
     protected function generateUniqueUsername(string $base): string
@@ -178,4 +152,6 @@ class UsuarioController extends Controller
 
         return $username;
     }
+
+
 }

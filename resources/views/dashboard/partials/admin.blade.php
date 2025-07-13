@@ -34,6 +34,23 @@
             @endif
         </div>
 
+        {{-- Importación de Usuarios --}}
+<div class="p-6 transition-shadow duration-200 rounded-2xl bg-white/60 backdrop-blur hover:shadow-lg">
+    <div class="flex items-center gap-4 mb-4">
+        <x-heroicon-o-arrow-up-tray class="w-6 h-6 text-sena-verde" aria-hidden="true" />
+        <h3 class="text-lg font-semibold text-gray-800">Importación de Usuarios</h3>
+    </div>
+    <p class="text-sm text-gray-600">
+        Carga masiva de usuarios a través de plantillas validadas y seguimiento de historial de importaciones.
+    </p>
+    @if (Route::has('admin.usuarios.importar.index'))
+        <a href="{{ route('admin.usuarios.importar.index') }}"
+            class="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-sena-verde hover:underline">
+            Iniciar importación
+            <x-heroicon-o-arrow-right class="w-4 h-4" />
+        </a>
+    @endif
+</div>
 
         {{-- Inventario --}}
         <div class="p-6 transition-shadow duration-200 rounded-2xl bg-white/60 backdrop-blur hover:shadow-lg">
