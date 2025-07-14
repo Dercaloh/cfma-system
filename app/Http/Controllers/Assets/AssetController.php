@@ -1,12 +1,12 @@
 <?php
 /*-- app/Http/Controllers/AssetController.php */
-namespace App\Http\Controllers\Inventory;
+namespace App\Http\Controllers\Assets;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assets\Asset;
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreAssetRequest;
-use App\Http\Requests\UpdateAssetRequest;
+use App\Http\Requests\Assets\StoreAssetRequest;
+use App\Http\Requests\Assets\UpdateAssetRequest;
 
 class AssetController extends Controller
 {
@@ -36,7 +36,7 @@ class AssetController extends Controller
             ->paginate(10)
             ->withQueryString(); // Mantener filtros en la paginación
 
-        return view('inventario.index', compact('assets'));
+        return view('modules.activos.index', compact('assets'));
     }
     // Formulario de creación de activos
     public function create()

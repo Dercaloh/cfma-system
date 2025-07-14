@@ -5,10 +5,11 @@ use App\Http\Controllers\Users\UsuarioController;
 use App\Http\Controllers\Admin\UserExportController;
 use App\Http\Controllers\Web\Policy\PolicyViewController;
 use App\Http\Controllers\Admin\AuditoriaController;
-use App\Http\Controllers\Inventory\AssetController;
+use App\Http\Controllers\Assets\AssetController;
 use App\Http\Controllers\Documents\DocumentController;
 use App\Http\Controllers\Web\UbicacionesController;
 use App\Http\Controllers\Users\UsuarioImportController;
+use App\Http\Controllers\Assets\AssetTypeController;
 
 // En routes/web.php
 
@@ -74,4 +75,17 @@ Route::middleware(['auth', 'role:Administrador'])
 
         // 🏢 Consulta dinámica de ubicaciones
         Route::get('sedes/{branch}/ubicaciones', [UbicacionesController::class, 'porSede'])->name('sedes.ubicaciones');
+
+
+
+      Route::prefix('tipos-activos')->name('tipos_activos.')->group(function () {
+
+                Route::get('/', [AssetTypeController::class, 'index'])->name('index');
+                Route::get('/crear', [AssetTypeController::class, 'create'])->name('create');
+                Route::post('/', [AssetTypeController::class, 'store'])->name('store');
+                Route::get('/{assetType}', [AssetTypeController::class, 'show'])->name('show');
+                Route::get('/{assetType}/editar', [AssetTypeController::class, 'edit'])->name('edit');
+                Route::put('/{assetType}', [AssetTypeController::class, 'update'])->name('update');
+                Route::delete('/{assetType}', [AssetTypeController::class, 'destroy'])->name('destroy');
+            });
     });

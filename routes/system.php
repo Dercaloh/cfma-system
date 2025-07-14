@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Inventory\ExitPassController;
+use App\Http\Controllers\Assets\ExitPassController;
 use App\Http\Controllers\Security\UserSecurityLogController;
 
 Route::middleware('auth')->group(function () {

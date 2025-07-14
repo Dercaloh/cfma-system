@@ -1,7 +1,7 @@
 <?php
 /// app/Http/Controllers/ExitPassController.php
 
-namespace App\Http\Controllers\Inventory;
+namespace App\Http\Controllers\Assets;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\View;
