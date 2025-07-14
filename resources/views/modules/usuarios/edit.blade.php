@@ -50,7 +50,7 @@
                 </div>
 
                 {{-- Consentimientos --}}
-                <x-profile.profile-title icon="check-circle" title="Consentimientos de tratamiento de datos" />
+                <x-profile.profile-title check-circle title="Consentimientos de tratamiento de datos" />
                 <div class="grid grid-cols-1 gap-4 text-sm text-gray-800 sm:grid-cols-2">
                     <x-fields.checkbox-field name="consent_data_processing" label="Acepta el tratamiento de datos personales" :checked="old('consent_data_processing', $user->consent_data_processing)" />
                     <x-fields.checkbox-field name="consent_marketing" label="Acepta recibir comunicaciones institucionales" :checked="old('consent_marketing', $user->consent_marketing)" />
