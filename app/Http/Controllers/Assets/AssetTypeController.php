@@ -39,7 +39,7 @@ class AssetTypeController extends Controller
     {
         try {
             $search = $request->get('search', '');
-            $perPage = in_array($request->get('per_page'), [5, 10, 15, 25, 50]) ? $request->get('per_page') : 10;
+            $perPage = in_array($request->get('per_page'), [5, 10, 15, 25, 50]) ? $request->get('per_page') : 25;
             $status = in_array($request->get('status'), ['all', 'active', 'inactive']) ? $request->get('status') : 'all';
 
             $query = AssetType::query();
@@ -254,7 +254,7 @@ class AssetTypeController extends Controller
                     'associated_assets' => $assetsCount,
                 ]);
 
-                return redirect()->route('tipos_activos.index')
+                return redirect()->route('admin.tipos_activos.index')
                     ->with('error', "No se puede eliminar el tipo '{$assetType->name}' porque tiene activos asociados.");
             }
 
@@ -267,14 +267,14 @@ class AssetTypeController extends Controller
                 'deleted_data' => $deletedData,
             ]);
 
-            return redirect()->route('tipos_activos.index')
+            return redirect()->route('admin.tipos_activos.index')
                 ->with('success', "Tipo de activo '{$assetType->name}' eliminado correctamente.");
         } catch (\Exception $e) {
             Log::error('Error al eliminar tipo de activo.', [
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('tipos_activos.index')
+            return redirect()->route('admin.tipos_activos.index')
                 ->with('error', 'No se pudo eliminar el tipo de activo.');
         }
     }

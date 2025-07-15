@@ -19,9 +19,6 @@
                 </tbody>
             </table>
         </div>
-
-        {{-- Paginación --}}
-        <x-pagination.pagination-info :items="$assetTypes" />
     @else
         <x-table.empty-state />
     @endif
