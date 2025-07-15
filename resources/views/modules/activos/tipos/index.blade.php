@@ -29,11 +29,15 @@
 
     {{-- Estadísticas --}}
     <div class="flex flex-wrap justify-between gap-4 sm:justify-start">
-    <x-stats.stats-card title="Total Tipos" value="{{ $assetTypes->total() }}" icon="archive-box" color="blue" trend="+2 hoy" />
-    <x-stats.stats-card title="Activos" value="{{ $stats['active'] ?? 0 }}" icon="check-circle" color="green" trend="+1 hoy" />
-    <x-stats.stats-card title="Inactivos" value="{{ $stats['inactive'] ?? 0 }}" icon="x-circle" color="red" trend="0" trendDirection="down" />
-    <x-stats.stats-card title="Creados Hoy" value="{{ $stats['today'] ?? 0 }}" icon="clock" color="purple" trend="+2" />
-</div>
+        <x-stats.stats-card title="Total Tipos" value="{{ $assetTypes->total() }}" icon="archive-box" color="blue"
+            trend="+2 hoy" />
+        <x-stats.stats-card title="Activos" value="{{ $stats['active'] ?? 0 }}" icon="check-circle" color="green"
+            trend="+1 hoy" />
+        <x-stats.stats-card title="Inactivos" value="{{ $stats['inactive'] ?? 0 }}" icon="x-circle" color="red"
+            trend="0" trendDirection="down" />
+        <x-stats.stats-card title="Creados Hoy" value="{{ $stats['today'] ?? 0 }}" icon="clock" color="purple"
+            trend="+2" />
+    </div>
 
 
 
@@ -146,7 +150,11 @@
                         </td>
 
                         <td class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
-                            <x-buttons.action-buttons-group :asset-type="$assetType" />
+                        <td class="px-6 py-4 text-sm font-medium text-center whitespace-nowrap">
+                            <x-buttons.table-row-actions :item="$assetType" showRoute="admin.tipos_activos.show"
+                                editRoute="admin.tipos_activos.edit" deleteRoute="admin.tipos_activos.destroy" />
+                        </td>
+
                         </td>
                     </x-table.table-row>
                 @endforeach

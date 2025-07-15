@@ -81,7 +81,7 @@ class AssetTypeController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('error', 'Error al cargar tipos de activos. Contacte al administrador.');
         }
     }
@@ -103,7 +103,7 @@ class AssetTypeController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('error', 'Error al cargar el formulario de creación.');
         }
     }
@@ -130,7 +130,7 @@ class AssetTypeController extends Controller
                 'asset_type_id' => $assetType->id,
             ]);
 
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('success', "Tipo de activo '{$assetType->name}' creado correctamente.");
         } catch (\Exception $e) {
             Log::error('Error al crear tipo de activo.', [
@@ -169,7 +169,7 @@ class AssetTypeController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('error', 'Error al cargar detalles del tipo de activo.');
         }
     }
@@ -194,7 +194,7 @@ class AssetTypeController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('error', 'No se pudo acceder al formulario de edición.');
         }
     }
@@ -224,7 +224,7 @@ class AssetTypeController extends Controller
                 'changes' => ['from' => $originalData, 'to' => $validated],
             ]);
 
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('success', "Tipo de activo '{$assetType->name}' actualizado correctamente.");
         } catch (\Exception $e) {
             Log::error('Error al actualizar tipo de activo.', [
@@ -254,7 +254,7 @@ class AssetTypeController extends Controller
                     'associated_assets' => $assetsCount,
                 ]);
 
-                return redirect()->route('asset-types.index')
+                return redirect()->route('tipos_activos.index')
                     ->with('error', "No se puede eliminar el tipo '{$assetType->name}' porque tiene activos asociados.");
             }
 
@@ -267,14 +267,14 @@ class AssetTypeController extends Controller
                 'deleted_data' => $deletedData,
             ]);
 
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('success', "Tipo de activo '{$assetType->name}' eliminado correctamente.");
         } catch (\Exception $e) {
             Log::error('Error al eliminar tipo de activo.', [
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('asset-types.index')
+            return redirect()->route('tipos_activos.index')
                 ->with('error', 'No se pudo eliminar el tipo de activo.');
         }
     }

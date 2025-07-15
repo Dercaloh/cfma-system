@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <title>@yield('title', 'SGPTI — SENA CFMA')</title>
@@ -13,7 +14,8 @@
     @stack('styles')
 </head>
 
-<body class="flex flex-col min-h-screen font-sans text-gray-900 bg-gradient-to-br from-white via-white/70 to-white/50 backdrop-blur-xl">
+<body
+    class="flex flex-col min-h-screen font-sans text-gray-900 bg-gradient-to-br from-white via-white/70 to-white/50 backdrop-blur-xl">
 
     {{-- Encabezado institucional --}}
     <x-layout.header />
@@ -23,16 +25,15 @@
 
     {{-- Encabezado contextual --}}
     @if (!empty($header))
-        <x-layout.context-header>
-            {{ $header }}
-        </x-layout.context-header>
+        {{ $header }}
     @endif
+
 
     {{-- Contenido dinámico --}}
     <main class="flex-grow px-6 py-8 mx-auto max-w-7xl">
-    <x-security.watermark />
-    {{ $slot }}
-</main>
+        <x-security.watermark />
+        {{ $slot }}
+    </main>
 
 
     {{-- Pie institucional --}}
@@ -43,4 +44,5 @@
 
     @stack('scripts')
 </body>
+
 </html>
