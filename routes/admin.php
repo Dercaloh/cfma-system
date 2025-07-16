@@ -78,14 +78,14 @@ Route::middleware(['auth', 'role:Administrador'])
 
 
 
-      Route::prefix('tipos-activos')->name('tipos_activos.')->group(function () {
-
-                Route::get('/', [AssetTypeController::class, 'index'])->name('index');
-                Route::get('/crear', [AssetTypeController::class, 'create'])->name('create');
-                Route::post('/', [AssetTypeController::class, 'store'])->name('store');
-                Route::get('/{assetType}', [AssetTypeController::class, 'show'])->name('show');
-                Route::get('/{assetType}/editar', [AssetTypeController::class, 'edit'])->name('edit');
-                Route::put('/{assetType}', [AssetTypeController::class, 'update'])->name('update');
-                Route::delete('/{assetType}', [AssetTypeController::class, 'destroy'])->name('destroy');
-            });
+        Route::prefix('tipos-activos')->name('tipos_activos.')->group(function () {
+            Route::get('/', [AssetTypeController::class, 'index'])->name('index');
+            Route::get('/crear', [AssetTypeController::class, 'create'])->name('create');
+            Route::post('/', [AssetTypeController::class, 'store'])->name('store');
+            Route::get('/{assetType}', [AssetTypeController::class, 'show'])->name('show');
+            Route::get('/{assetType}/editar', [AssetTypeController::class, 'edit'])->name('edit');
+            Route::put('/{assetType}', [AssetTypeController::class, 'update'])->name('update');
+            Route::delete('/{assetType}', [AssetTypeController::class, 'destroy'])->name('destroy');
+            Route::patch('/{id}/restaurar', [AssetTypeController::class, 'restore'])->name('restore');
+        });
     });

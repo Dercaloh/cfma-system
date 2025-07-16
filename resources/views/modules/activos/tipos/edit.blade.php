@@ -1,26 +1,27 @@
 <x-app-layout>
-    <x-slot name="header">
+ <x-slot name="header">
     <x-layout.section-header
-        icon="pencil-square"
-        iconColor="amber"
-        title="Editar Tipo de Activo"
-        subtitle="Modifica la información de: <strong>{{ $assetType->name }}</strong>"
-    >
+        icon="document"
+        iconColor="blue"
+        title="Detalle del Tipo de Activo"
+        subtitle="Información completa y estadísticas del tipo: <strong>{{ $assetType->name }}</strong>">
+
+        {{-- Slot para acciones --}}
         <x-slot name="actions">
-            <x-buttons.link-button
-                href="{{ route('admin.tipos_activos.show', $assetType) }}"
-                icon="eye"
-                text="Ver detalle"
-            />
-            <x-buttons.link-button
-                href="{{ route('admin.tipos_activos.index') }}"
-                icon="arrow-left"
-                text="Volver al listado"
-            />
+            <x-buttons.link-button href="{{ route('admin.tipos_activos.edit', $assetType) }}" icon="pencil-square" text="Editar" />
+            <x-buttons.link-button href="{{ route('admin.tipos_activos.index') }}" icon="arrow-left" text="Volver al listado" />
+        </x-slot>
+
+        {{-- Slot para breadcrumb (opcional y fuera de los atributos HTML) --}}
+        <x-slot name="breadcrumb">
+            <x-layout.breadcrumb :items="[
+                ['name' => 'Inicio', 'url' => route('dashboard')],
+                ['name' => 'Tipos de Activos', 'url' => route('admin.tipos_activos.index')],
+                ['name' => $assetType->name, 'url' => null],
+            ]" />
         </x-slot>
     </x-layout.section-header>
 </x-slot>
-
 
 
     {{-- Información del activo --}}

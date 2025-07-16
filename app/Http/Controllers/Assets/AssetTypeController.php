@@ -41,50 +41,74 @@ class AssetTypeController extends Controller
             $search = $request->get('search', '');
             $perPage = in_array($request->get('per_page'), [5, 10, 15, 25, 50]) ? $request->get('per_page') : 25;
             $status = in_array($request->get('status'), ['all', 'active', 'inactive']) ? $request->get('status') : 'all';
+            $showDeleted = $request->boolean('show_deleted', false);
 
+            // Consulta base
             $query = AssetType::query();
 
+            // Si se deben incluir eliminados, se agregan con withTrashed()
+            if ($showDeleted) {
+                $query->withTrashed();
+            }
+
+            // Filtro de búsqueda (nombre o descripción)
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%$search%")
-                      ->orWhere('description', 'like', "%$search%");
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
                 });
             }
 
+            // Filtrar por estado solo si no se está listando eliminados exclusivamente
             if ($status === 'active') {
                 $query->where('active', true);
             } elseif ($status === 'inactive') {
                 $query->where('active', false);
             }
 
+            // Orden y paginación
             $assetTypes = $query->orderBy('name')->paginate($perPage)->withQueryString();
 
+            // Estadísticas
             $stats = [
-                'total' => AssetType::count(),
-                'active' => AssetType::where('active', true)->count(),
+                'total'    => AssetType::withTrashed()->count(),
+                'active'   => AssetType::where('active', true)->count(),
                 'inactive' => AssetType::where('active', false)->count(),
+                'deleted'  => AssetType::onlyTrashed()->count(),
+                'today'    => AssetType::whereDate('created_at', now()->toDateString())->count(),
             ];
 
+            // Auditoría
             Log::info('Listado de tipos de activos accedido.', [
-                'user_id' => Auth::id(),
-                'search' => $search,
-                'status' => $status,
-                'per_page' => $perPage,
+                'user_id'       => Auth::id(),
+                'search'        => $search,
+                'status'        => $status,
+                'show_deleted'  => $showDeleted,
+                'per_page'      => $perPage,
                 'total_results' => $assetTypes->total(),
             ]);
 
             return view('modules.activos.tipos.index', compact(
-                'assetTypes', 'search', 'status', 'perPage', 'stats'
+                'assetTypes',
+                'search',
+                'status',
+                'perPage',
+                'stats',
+                'showDeleted'
             ));
         } catch (\Exception $e) {
             Log::error('Error en index de tipos de activos.', [
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ]);
+
             return redirect()->route('tipos_activos.index')
                 ->with('error', 'Error al cargar tipos de activos. Contacte al administrador.');
         }
     }
+
+
+
 
     /**
      * Mostrar formulario de creación.
@@ -154,8 +178,8 @@ class AssetTypeController extends Controller
         try {
             $stats = [
                 'total_assets' => $assetType->assets()->count(),
-                'active_assets' => $assetType->assets()->where('active', true)->count(),
-                'inactive_assets' => $assetType->assets()->where('active', false)->count(),
+                'active_assets' => 0,
+                'inactive_assets' => 0,
             ];
 
             Log::info('Detalle de tipo de activo accedido.', [
@@ -169,10 +193,12 @@ class AssetTypeController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
-            return redirect()->route('tipos_activos.index')
+
+            return redirect()->route('admin.tipos_activos.index')
                 ->with('error', 'Error al cargar detalles del tipo de activo.');
         }
     }
+
 
     /**
      * Formulario para editar un tipo de activo.
@@ -276,6 +302,62 @@ class AssetTypeController extends Controller
             ]);
             return redirect()->route('admin.tipos_activos.index')
                 ->with('error', 'No se pudo eliminar el tipo de activo.');
+        }
+    }
+    /**
+     * Restaurar tipo de activo eliminado (soft delete).
+     *
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function restore(int $id): RedirectResponse
+    {
+        try {
+            $assetType = AssetType::onlyTrashed()->findOrFail($id);
+
+            // Verificar que el nombre no esté en uso por otro registro activo
+            $existingActive = AssetType::where('name', $assetType->name)
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($existingActive) {
+                Log::warning('Restauración bloqueada: nombre ya existe en registro activo.', [
+                    'user_id' => Auth::id(),
+                    'asset_type_id' => $id,
+                    'name' => $assetType->name,
+                ]);
+
+                return redirect()->back()
+                    ->with('error', "No se puede restaurar '{$assetType->name}' porque ya existe un tipo activo con ese nombre.");
+            }
+
+            $restoredData = $assetType->only(['id', 'name', 'description', 'active']);
+            $assetType->restore();
+
+            Log::info('Tipo de activo restaurado.', [
+                'user_id' => Auth::id(),
+                'restored_data' => $restoredData,
+            ]);
+
+            return redirect()->route('tipos_activos.index')
+                ->with('success', "Tipo de activo '{$assetType->name}' restaurado correctamente.");
+        } catch (ModelNotFoundException $e) {
+            Log::error('Tipo de activo eliminado no encontrado para restaurar.', [
+                'user_id' => Auth::id(),
+                'asset_type_id' => $id,
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'El tipo de activo no existe o no está eliminado.');
+        } catch (\Exception $e) {
+            Log::error('Error al restaurar tipo de activo.', [
+                'user_id' => Auth::id(),
+                'asset_type_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'No se pudo restaurar el tipo de activo.');
         }
     }
 }

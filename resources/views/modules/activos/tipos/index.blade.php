@@ -27,11 +27,14 @@
     <div class="p-6 mb-8 bg-white shadow-lg rounded-xl">
         <form method="GET" action="{{ route('admin.tipos_activos.index') }}" class="space-y-4">
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                {{-- Campo de búsqueda --}}
                 <div class="lg:col-span-2">
                     <x-fields.input-field name="search" label="Buscar tipos de activos"
                         placeholder="Buscar por nombre o descripción..." value="{{ request('search') }}" icon="search"
                         class="{{ request('search') ? 'filter-active' : '' }}" />
                 </div>
+
+                {{-- Estado --}}
                 <div>
                     <x-fields.select-field name="status" label="Estado" :options="[
                         '' => 'Todos los estados',
@@ -42,14 +45,22 @@
                 </div>
             </div>
 
+            {{-- Checkbox mostrar eliminados + botones --}}
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                    <label class="inline-flex items-center gap-2 text-sm text-sena-gris-oscuro">
+                        <input type="checkbox" name="show_deleted" value="1"
+                            class="form-checkbox text-sena-verde focus:ring-sena-verde"
+                            {{ request()->boolean('show_deleted') ? 'checked' : '' }}>
+                        Mostrar eliminados ({{ $stats['deleted'] ?? 0 }})
+                    </label>
+
                     <x-buttons.primary-button type="submit">
                         <x-heroicon-o-magnifying-glass class="w-4 h-4 mr-2" />
                         Buscar
                     </x-buttons.primary-button>
 
-                    @if (request()->hasAny(['search', 'status']))
+                    @if (request()->hasAny(['search', 'status', 'show_deleted']))
                         <a href="{{ route('admin.tipos_activos.index') }}"
                             class="inline-flex items-center gap-2 px-4 py-2 text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200">
                             <x-heroicon-o-x-mark class="w-4 h-4" />
@@ -58,17 +69,44 @@
                     @endif
                 </div>
 
+                {{-- Selector de resultados por página --}}
                 <x-filters.results-per-page-selector :current="request('per_page', 25)" :options="[10, 25, 50, 100]" />
             </div>
         </form>
     </div>
 
     {{-- Tabla --}}
+    @php
+        $searchTerm = request('search');
+    @endphp
+
     @if ($assetTypes->count())
-        <x-table.asset-types-table :asset-types="$assetTypes" :search-term="request('search')" />
+        <div class="overflow-x-auto bg-white shadow-sm rounded-xl">
+            <table class="w-full text-sm text-left table-auto text-sena-gris-oscuro">
+                <thead class="text-xs font-semibold text-sena-azul bg-sena-gris-claro/40">
+                    <tr>
+                        <th class="px-6 py-3">Nombre</th>
+                        <th class="px-6 py-3">Descripción</th>
+                        <th class="px-6 py-3">Estado</th>
+                        <th class="px-6 py-3">Fecha creación</th>
+                        <th class="px-6 py-3 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-100">
+                    @forelse ($assetTypes as $assetType)
+                        <x-table.table-row :assetType="$assetType" :searchTerm="$searchTerm" />
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-sena-gris-oscuro">
+                                No se encontraron tipos de activos con los filtros actuales.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-        {{-- Paginación única --}}
-
+        {{-- Paginación --}}
         @if ($assetTypes->hasPages())
             <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 {{ $assetTypes->appends(request()->query())->links() }}
@@ -112,10 +150,8 @@
                 const select = document.querySelector('form select[name="per_page"]');
                 if (select) {
                     select.addEventListener('change', () => {
-                        // Si el formulario no incluye search/status, agrégalos dinámicamente
                         const form = select.closest('form');
                         if (form) {
-                            // Garantiza que no se pierdan filtros al cambiar per_page
                             const urlParams = new URLSearchParams(window.location.search);
                             ['search', 'status'].forEach(param => {
                                 if (urlParams.has(param) && !form.querySelector(`[name="${param}"]`)) {
@@ -133,6 +169,4 @@
             });
         </script>
     @endpush
-
-
 </x-app-layout>
