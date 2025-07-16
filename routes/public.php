@@ -3,6 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Web\Policy\UserPolicyController;
+use App\Http\Controllers\ComponentTestController;
+
+Route::get('/test-components', [ComponentTestController::class, 'index'])
+    ->name('components.test'); // sin middleware de autenticación
+
+
 
 Route::get('/', fn() => Auth::check() ? redirect()->route('dashboard') : view('welcome'))->name('home');
 

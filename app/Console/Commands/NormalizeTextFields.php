@@ -5,11 +5,11 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use App\Models\Department;
-use App\Models\Position;
-use App\Models\Branch;
-use App\Models\Program;
-use App\Models\Location;
+use App\Models\Locations\Department;
+use App\Models\Programs\Position;
+use App\Models\Locations\Branch;
+use App\Models\Programs\Program;
+use App\Models\Locations\Location;
 
 class NormalizeTextFields extends Command
 {

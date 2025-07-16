@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\ComponentTestController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Users\UsuarioController;
 use App\Http\Controllers\Admin\UserExportController;
@@ -88,4 +88,8 @@ Route::middleware(['auth', 'role:Administrador'])
             Route::delete('/{assetType}', [AssetTypeController::class, 'destroy'])->name('destroy');
             Route::patch('/{id}/restaurar', [AssetTypeController::class, 'restore'])->name('restore');
         });
+        Route::get('/test-components', function () {
+    return view('components-test');
+})->middleware(['auth']);
+
     });
