@@ -94,117 +94,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                     @forelse ($assetTypes as $assetType)
-                        <tr class="transition-colors hover:bg-gray-50">
-                            {{-- Nombre --}}
-                            <td class="px-6 py-4 font-medium">
-                                @if ($searchTerm)
-                                    {!! str_ireplace($searchTerm, '<mark class="px-1 bg-yellow-200 rounded">' . $searchTerm . '</mark>', e($assetType->name)) !!}
-                                @else
-                                    {{ $assetType->name }}
-                                @endif
-                            </td>
-
-                            {{-- Descripción --}}
-                            <td class="max-w-xs px-6 py-4">
-                                @if ($assetType->description)
-                                    <div class="truncate" title="{{ $assetType->description }}">
-                                        @if ($searchTerm)
-                                            {!! str_ireplace($searchTerm, '<mark class="px-1 bg-yellow-200 rounded">' . $searchTerm . '</mark>', e($assetType->description)) !!}
-                                        @else
-                                            {{ $assetType->description }}
-                                        @endif
-                                    </div>
-                                @else
-                                    <span class="italic text-gray-400">Sin descripción</span>
-                                @endif
-                            </td>
-
-                            {{-- Estado usando el componente status-badge --}}
-<td class="px-6 py-4">
-    @if ($assetType->trashed())
-        <x-ui.status-badge status="cancelled" size="sm" pulse="false" />
-    @else
-        <x-ui.status-badge
-            status="{{ $assetType->is_active ? 'active' : 'inactive' }}"
-            size="sm"
-            pulse="false"
-        />
-    @endif
-</td>
-
-
-                            {{-- Fecha creación --}}
-                            <td class="px-6 py-4">
-                                <div class="flex flex-col">
-                                    <span class="text-sm">{{ $assetType->created_at->format('d/m/Y') }}</span>
-                                    <span class="text-xs text-gray-500">{{ $assetType->created_at->format('H:i') }}</span>
-                                </div>
-                            </td>
-
-                            {{-- Acciones --}}
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    @if ($assetType->trashed())
-                                        {{-- Botones para elementos eliminados --}}
-                                        @can('restaurar tipos de activos')
-                                            <form method="POST" action="{{ route('admin.tipos_activos.restore', $assetType->id) }}" class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="inline-flex items-center gap-1 px-3 py-1 text-xs text-green-700 transition-colors bg-green-100 rounded-lg hover:bg-green-200"
-                                                    onclick="return confirm('¿Está seguro de que desea restaurar este tipo de activo?')">
-                                                    <x-heroicon-o-arrow-path class="w-4 h-4" />
-                                                    Restaurar
-                                                </button>
-                                            </form>
-                                        @endcan
-
-                                        @can('eliminar tipos de activos permanentemente')
-                                            <form method="POST" action="{{ route('admin.tipos_activos.force-delete', $assetType->id) }}" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="inline-flex items-center gap-1 px-3 py-1 text-xs text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200"
-                                                    onclick="return confirm('¿Está seguro de que desea eliminar permanentemente este tipo de activo? Esta acción no se puede deshacer.')">
-                                                    <x-heroicon-o-trash class="w-4 h-4" />
-                                                    Eliminar permanentemente
-                                                </button>
-                                            </form>
-                                        @endcan
-                                    @else
-                                        {{-- Botones para elementos activos --}}
-                                        @can('ver tipos de activos')
-                                            <a href="{{ route('admin.tipos_activos.show', $assetType) }}"
-                                               class="inline-flex items-center gap-1 px-3 py-1 text-xs text-blue-700 transition-colors bg-blue-100 rounded-lg hover:bg-blue-200">
-                                                <x-heroicon-o-eye class="w-4 h-4" />
-                                                Ver
-                                            </a>
-                                        @endcan
-
-                                        @can('editar tipos de activos')
-                                            <a href="{{ route('admin.tipos_activos.edit', $assetType) }}"
-                                               class="inline-flex items-center gap-1 px-3 py-1 text-xs transition-colors rounded-lg text-amber-700 bg-amber-100 hover:bg-amber-200">
-                                                <x-heroicon-o-pencil class="w-4 h-4" />
-                                                Editar
-                                            </a>
-                                        @endcan
-
-                                        @can('eliminar tipos de activos')
-                                            <form method="POST" action="{{ route('admin.tipos_activos.destroy', $assetType) }}" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="inline-flex items-center gap-1 px-3 py-1 text-xs text-red-700 transition-colors bg-red-100 rounded-lg hover:bg-red-200"
-                                                    onclick="return confirm('¿Está seguro de que desea eliminar este tipo de activo?')">
-                                                    <x-heroicon-o-trash class="w-4 h-4" />
-                                                    Eliminar
-                                                </button>
-                                            </form>
-                                        @endcan
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
+                        <x-table.table-row :assetType="$assetType" :searchTerm="$searchTerm" />
                     @empty
                         <tr>
                             <td colspan="5" class="px-6 py-4 text-center text-sena-gris-oscuro">
@@ -257,14 +147,13 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Manejo del selector de resultados por página
                 const select = document.querySelector('form select[name="per_page"]');
                 if (select) {
                     select.addEventListener('change', () => {
                         const form = select.closest('form');
                         if (form) {
                             const urlParams = new URLSearchParams(window.location.search);
-                            ['search', 'status', 'show_deleted'].forEach(param => {
+                            ['search', 'status'].forEach(param => {
                                 if (urlParams.has(param) && !form.querySelector(`[name="${param}"]`)) {
                                     const hidden = document.createElement('input');
                                     hidden.type = 'hidden';
@@ -277,16 +166,6 @@
                         }
                     });
                 }
-
-                // Confirmación para acciones destructivas
-                const deleteButtons = document.querySelectorAll('button[onclick*="confirm"]');
-                deleteButtons.forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        if (!confirm(button.getAttribute('onclick').match(/confirm\('([^']+)'\)/)[1])) {
-                            e.preventDefault();
-                        }
-                    });
-                });
             });
         </script>
     @endpush

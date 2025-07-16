@@ -1,5 +1,10 @@
 @props(['assetType', 'searchTerm' => null])
-
+@php
+    $isDeleted = $assetType->trashed();
+    $status = $isDeleted
+        ? 'custom'
+        : ($assetType->active ? 'active' : 'inactive');
+@endphp
 <tr class="table-row">
     <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex items-center">
@@ -30,7 +35,11 @@
     </td>
 
     <td class="px-6 py-4 whitespace-nowrap">
-        <x-ui.status-badge :active="$assetType->active" />
+         <x-ui.status-badge
+        :status="$assetType->trashed()
+            ? 'deleted'
+            : ($assetType->active ? 'active' : 'inactive')"
+    />
     </td>
 
     <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">

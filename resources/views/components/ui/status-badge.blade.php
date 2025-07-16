@@ -1,8 +1,8 @@
 {{-- resources/views/components/ui/status-badge.blade.php --}}
-{{-- SGPTI - Sistema de Gestión de Préstamos de TI --}}
+{{-- SGPTI - Componente reusable de estado con ícono o punto animado --}}
 @props([
     'status' => 'active',
-    'type' => 'default',
+    'type' => 'default', // opciones: default | icon | dot
     'size' => 'sm',
     'label' => null,
     'icon' => null,
@@ -11,7 +11,7 @@
 ])
 
 @php
-    // Forzar que pulse sea booleano incluso si se pasa como string
+    // Convertir string 'false' o 'true' en booleano
     $pulse = filter_var($pulse, FILTER_VALIDATE_BOOLEAN);
 
     $sizeClasses = [
@@ -119,6 +119,14 @@
             'label' => 'Prestado',
             'dot' => 'bg-amber-500',
         ],
+        'deleted' => [
+            'bg' => 'bg-gray-200',
+            'text' => 'text-gray-700',
+            'border' => 'border-gray-300',
+            'icon' => 'heroicon-s-trash',
+            'label' => 'Eliminado',
+            'dot' => 'bg-gray-500',
+        ],
     ];
 
     $config = $statusConfig[$status] ?? $statusConfig['active'];
@@ -127,27 +135,25 @@
         $config = array_merge($config, $customColors);
     }
 
-    $baseClasses = "inline-flex items-center font-medium rounded-full border";
+    $baseClasses = 'inline-flex items-center font-medium rounded-full border';
     $sizeClass = $sizeClasses[$size] ?? $sizeClasses['sm'];
     $colorClasses = "{$config['bg']} {$config['text']} {$config['border']}";
     $classes = "$baseClasses $sizeClass $colorClasses";
 
-    $iconSize = match($size) {
+    $iconSize = match ($size) {
         'xs' => 'w-3 h-3',
-        'sm' => 'w-4 h-4',
-        'md' => 'w-4 h-4',
+        'sm', 'md' => 'w-4 h-4',
         'lg' => 'w-5 h-5',
         'xl' => 'w-6 h-6',
-        default => 'w-4 h-4'
+        default => 'w-4 h-4',
     };
 
-    $dotSize = match($size) {
+    $dotSize = match ($size) {
         'xs' => 'w-1.5 h-1.5',
-        'sm' => 'w-2 h-2',
-        'md' => 'w-2 h-2',
+        'sm', 'md' => 'w-2 h-2',
         'lg' => 'w-2.5 h-2.5',
         'xl' => 'w-3 h-3',
-        default => 'w-2 h-2'
+        default => 'w-2 h-2',
     };
 
     $displayLabel = $label ?? $config['label'];
@@ -155,32 +161,16 @@
 @endphp
 
 <span {{ $attributes->merge(['class' => $classes]) }} role="status" aria-label="{{ $displayLabel }}">
-    @if($type === 'dot')
-        <span class="{{ $dotSize }} {{ $config['dot'] }} rounded-full mr-1.5 @if($pulse) animate-pulse @endif"></span>
+    @if ($type === 'dot')
+        <span
+            class="{{ $dotSize }} {{ $config['dot'] }} rounded-full mr-1.5 {{ $pulse ? 'animate-pulse' : '' }}"></span>
     @elseif($type === 'icon' || $type === 'default')
-        <x-dynamic-component :component="$displayIcon"
-            class="{{ $iconSize }} mr-1 @if($pulse) animate-pulse @endif" />
+        <x-dynamic-component :component="$displayIcon" class="{{ $iconSize }} mr-1 {{ $pulse ? 'animate-pulse' : '' }}" />
     @endif
 
     {{ $displayLabel }}
 
-    @if($pulse && $type !== 'dot')
+    @if ($pulse && $type !== 'dot')
         <span class="{{ $dotSize }} {{ $config['dot'] }} rounded-full ml-1.5 animate-pulse"></span>
     @endif
 </span>
-
-{{-- Estilos opcionales --}}
-<style>
-    .status-badge-glow {
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
-    }
-
-    .status-badge-pulse {
-        animation: pulse-soft 2s infinite;
-    }
-
-    @keyframes pulse-soft {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-</style>
