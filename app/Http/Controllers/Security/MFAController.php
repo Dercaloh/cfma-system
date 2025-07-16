@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Security;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\Security\MFAService;
-use App\Models\Security\UserSecurity;
+use App\Models\AccessControl\UserSecurity;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Security\EnableMFARequest;
 use App\Http\Requests\Security\VerifyMFARequest;

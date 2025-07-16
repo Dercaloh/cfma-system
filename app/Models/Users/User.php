@@ -12,57 +12,60 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\Traits\CausesActivity;
 use Spatie\Activitylog\LogOptions;
 
+use Illuminate\Support\Facades\Hash;
 use App\Helpers\CryptoHelper;
+use App\Traits\NormalizesTextFields;
 
-// ✅ Importaciones según estructura limpia
-use App\Models\Locations\Department;
+// Modelos relacionados
 use App\Models\Locations\Branch;
+use App\Models\Locations\Department;
 use App\Models\Locations\Location;
+use App\Models\Programs\Position;
 use App\Models\Loans\Loan;
 use App\Models\Policies\UserPolicy;
 use App\Models\AccessControl\UserSecurity;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes, HasRoles, LogsActivity, CausesActivity, \App\Traits\NormalizesTextFields;
+    use HasFactory,
+        Notifiable,
+        SoftDeletes,
+        HasRoles,
+        LogsActivity,
+        CausesActivity,
+        NormalizesTextFields;
 
-    /**
-     * 🟢 Información Pública (visible institucionalmente)
-     */
+    // ────────── Configuración ──────────
+
+    protected $table = 'users';
+
     protected $fillable = [
         'first_name',
         'last_name',
-        'email',
         'username',
+        'email',
+        'identification_number',
+        'document_type',
+        'phone_number',
+        'personal_email',
+        'institutional_email',
         'employee_id',
-        'job_title',
         'department_id',
         'branch_id',
         'location_id',
-
-        /**
-         * 🟡 Información Pública Clasificada (uso interno)
-         */
+        'position_id',
+        'password',
         'status',
         'account_valid_from',
         'account_valid_until',
-        'last_password_change_at',
-        'last_login_ip',
-        'last_login_at',
-        'password_policy_version',
-
         'consent_data_processing',
         'consent_marketing',
         'consent_data_sharing',
         'consent_timestamp',
         'privacy_policy_version',
-
         'mfa_enabled',
     ];
 
-    /**
-     * 🔴 Información Pública Reservada
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -73,30 +76,26 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at'        => 'datetime',
-        'last_login_at'            => 'datetime',
-        'last_password_change_at'  => 'datetime',
         'account_valid_from'       => 'date',
         'account_valid_until'      => 'date',
-        'consent_data_processing'  => 'boolean',
-        'consent_marketing'        => 'boolean',
-        'consent_data_sharing'     => 'boolean',
         'consent_timestamp'        => 'datetime',
         'mfa_enabled'              => 'boolean',
+        'deleted_at'               => 'datetime',
     ];
 
-    protected static $normalizeTextFields = ['first_name', 'last_name'];
+    // ────────── Accessors & Mutators ──────────
 
-    /**
-     * ✅ Nombre completo virtual
-     */
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
     }
 
-    /**
-     * 🔐 Desencriptado de campos sensibles
-     */
+    public function setPasswordAttribute(string $value): void
+    {
+        // Hasheo seguro de la contraseña
+        $this->attributes['password'] = Hash::make($value);
+    }
+
     public function getMfaSecretAttribute($value): ?string
     {
         return $value ? CryptoHelper::decrypt($value) : null;
@@ -112,57 +111,86 @@ class User extends Authenticatable
         return $value ? json_decode(CryptoHelper::decrypt($value), true) : null;
     }
 
-    /**
-     * 🔗 Relaciones institucionales
-     */
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
+    // ────────── Relaciones ──────────
 
-    public function branch()
+    public function branch(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Branch::class);
     }
 
-    public function location()
+    public function department(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function location(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
 
-    public function loans()
+    public function position(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Position::class);
+    }
+
+    public function loans(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
-    public function policies()
+    public function policies(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(UserPolicy::class);
     }
 
-    public function security()
+    public function security(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(UserSecurity::class);
     }
 
+    // ────────── Scopes ──────────
+
     /**
-     * 🕒 Última política aceptada por nombre
+     * Usuarios con estado 'activo'
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'activo');
+    }
+
+    /**
+     * Filtrar por rol (Spatie)
+     */
+    public function scopeByRole($query, string $role)
+    {
+        return $query->whereHas('roles', fn($q) => $q->where('name', $role));
+    }
+
+    // ────────── Métodos Útiles ──────────
+
+    /**
+     * Última política aceptada por nombre
      */
     public function latestPolicy(string $name): ?UserPolicy
     {
-        return $this->policies()->where('policy_name', $name)->latest('accepted_at')->first();
+        return $this->policies()
+            ->where('policy_name', $name)
+            ->latest('accepted_at')
+            ->first();
     }
 
     /**
-     * ✅ MFA habilitado
+     * ¿MFA activado?
      */
     public function isMfaEnabled(): bool
     {
-        return $this->security ? (bool) $this->security->mfa_enabled : (bool) $this->mfa_enabled;
+        return $this->security
+            ? (bool) $this->security->mfa_enabled
+            : (bool) $this->mfa_enabled;
     }
 
     /**
-     * 🔘 Rol visible en interfaz
+     * Alias al primer rol asignado
      */
     public function getRoleAttribute()
     {
@@ -170,21 +198,30 @@ class User extends Authenticatable
     }
 
     /**
-     * 📝 Configuración de auditoría con Spatie
+     * ¿Usuario activo?
      */
-    public function getActivitylogOptions(): LogOptions
+    public function isActive(): bool
     {
-        return LogOptions::defaults()
-            ->logOnly(['first_name', 'last_name', 'email', 'status'])
-            ->useLogName('usuarios')
-            ->setDescriptionForEvent(fn(string $eventName) => "El usuario {$this->full_name} fue {$eventName}");
+        return $this->status === 'activo';
     }
 
-    /**
-     * 📛 Valor por defecto en toString
-     */
     public function __toString(): string
     {
         return $this->full_name;
+    }
+
+    // ────────── Configuración de Logs de Actividad ──────────
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('usuarios')
+            ->logOnly(['first_name', 'last_name', 'email', 'status'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(
+                fn(string $eventName) =>
+                "El usuario {$this->full_name} fue {$eventName}"
+            );
     }
 }

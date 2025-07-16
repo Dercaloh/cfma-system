@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Models;
+namespace App\Model\AccessControl;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use App\Models\Users\user;
 class UserSecurityLog extends Model
 {
     use HasFactory;

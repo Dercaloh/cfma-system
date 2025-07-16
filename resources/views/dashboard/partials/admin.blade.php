@@ -16,18 +16,18 @@
 
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-        {{-- Gestión de Usuarios (Prioritaria) --}}
+        {{-- Gestión Integral de Usuarios --}}
         <div class="p-6 transition-shadow duration-200 rounded-2xl bg-white/60 backdrop-blur hover:shadow-lg">
             <div class="flex items-center gap-4 mb-4">
                 <x-heroicon-o-users class="w-6 h-6 text-sena-verde" aria-hidden="true" />
-                <h3 class="text-lg font-semibold text-gray-800">Gestión de Usuarios</h3>
+                <h3 class="text-lg font-semibold text-gray-800">Gestión Integral de Usuarios</h3>
             </div>
             <p class="text-sm text-gray-600">
-                Accede al listado de usuarios registrados, realiza registros individuales o carga masiva.
+                Registra usuarios, realiza carga masiva y gestiona sus roles y permisos.
             </p>
             @if (Route::has('admin.usuarios.index'))
                 <a href="{{ route('admin.usuarios.index') }}"
-                    class="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-sena-verde hover:underline focus:outline focus-visible:ring-2 focus-visible:ring-sena-verde">
+                    class="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-sena-verde hover:underline">
                     Ir al módulo de usuarios
                     <x-heroicon-o-arrow-right class="w-4 h-4" />
                 </a>
@@ -35,24 +35,6 @@
         </div>
 
 
-
-        {{-- Gestión de Usuarios --}}
-        <div class="p-6 transition-shadow duration-200 rounded-2xl bg-white/60 backdrop-blur hover:shadow-lg">
-            <div class="flex items-center gap-4 mb-4">
-                <x-heroicon-o-users class="w-6 h-6 text-sena-verde" aria-hidden="true" />
-                <h3 class="text-lg font-semibold text-gray-800">Usuarios y Roles</h3>
-            </div>
-            <p class="text-sm text-gray-600">
-                Gestiona los usuarios, roles y permisos del sistema.
-            </p>
-            @if (Route::has('admin.users.index'))
-                <a href="{{ route('admin.users.index') }}"
-                    class="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-sena-verde hover:underline">
-                    Gestionar usuarios
-                    <x-heroicon-o-arrow-right class="w-4 h-4" />
-                </a>
-            @endif
-        </div>
 
         {{-- Inventario --}}
         <div class="p-6 transition-shadow duration-200 rounded-2xl bg-white/60 backdrop-blur hover:shadow-lg">

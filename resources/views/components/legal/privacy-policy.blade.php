@@ -1,4 +1,3 @@
-{{-- components/legal/privacy-policy.blade.php --}}
 @props([
     'version' => '1.0.0',
     'vigenteDesde' => '03/Julio/2023',
@@ -11,8 +10,7 @@
         {{-- 1. Responsable del Tratamiento --}}
         <section>
             <h2 class="text-lg font-semibold">1. Responsable del Tratamiento</h2>
-            <p>El <strong>SERVICIO NACIONAL DE APRENDIZAJE - SENA</strong>, identificado con NIT 899.999.034-1, con domicilio en
-                Calle 57 No. 8-69, Bogotá D.C., es el responsable del tratamiento de sus datos personales.</p>
+            <p>El <strong>SERVICIO NACIONAL DE APRENDIZAJE - SENA</strong>, identificado con NIT 899.999.034-1, con domicilio en Calle 57 No. 8-69, Bogotá D.C., es el responsable del tratamiento de sus datos personales.</p>
             <ul class="mt-2 list-disc list-inside">
                 <li><strong>Contacto:</strong> servicioalciudadano@sena.edu.co</li>
                 <li><strong>Teléfono:</strong> (601) 546 1500 ext. 12453 - 13006</li>
@@ -104,17 +102,29 @@
             <p class="mt-2 font-semibold">Al marcar "Acepto el tratamiento de datos personales según lo establecido", reconozco haber leído y comprendido este acuerdo completo.</p>
 
             @if ($formulario)
-                <form method="POST" action="{{ route('politicas.store') }}" class="mt-6 text-center">
+                <form method="POST"
+                      action="{{ route('politicas.store') }}"
+                      class="mt-6 text-center"
+                      onsubmit="this.querySelector('button').disabled = true;"
+                >
                     @csrf
                     <input type="hidden" name="policy_name" value="data_protection">
                     <input type="hidden" name="policy_version" value="{{ $version }}">
-                    <x-buttons.primary-button>
+
+                    <x-buttons.primary-button
+                        type="submit"
+                        aria-describedby="data-policy-context"
+                    >
                         Acepto el tratamiento de datos personales según lo establecido
                     </x-buttons.primary-button>
+
+                    <span class="block mt-2 text-xs text-gray-500">
+                        Se registrará: {{ now()->format('d/m/Y H:i') }} desde la IP {{ request()->ip() }}
+                    </span>
                 </form>
             @endif
 
-            <p class="mt-6 text-xs text-center text-gray-500">
+            <p id="data-policy-context" class="mt-6 text-xs text-center text-gray-500">
                 <strong>Documento probatorio:</strong> Su aceptación se registrará con fecha, hora y dirección IP<br>
                 Para ejercer sus derechos, contacte a: servicioalciudadano@sena.edu.co<br>
                 Sistema Integrado de Gestión y Autocontrol | GOR-POL-006 V01

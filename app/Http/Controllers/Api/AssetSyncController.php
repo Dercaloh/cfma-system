@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Asset;
-use App\Models\AssetHardwareDetail;
-use App\Models\AssetSoftwareDetail;
+use App\Models\Assets\Asset;
+use App\Models\Assets\AssetHardwareDetail;
+use App\Models\Assets\AssetSoftwareDetail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;

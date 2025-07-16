@@ -5,8 +5,12 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Schema;
-use App\Models\{Department, Position, Branch, Program, Location, User};
-
+use App\Models\Locations\Department;
+use App\Models\Programs\Position;
+use App\Models\Locations\Branch;
+use App\Models\Programs\Program;
+use App\Models\Locations\Location;
+use App\Models\Users\User;
 class NormalizeText extends Command
 {
     protected $signature = 'normalize:text {--user= : ID del usuario que ejecuta la normalización}';

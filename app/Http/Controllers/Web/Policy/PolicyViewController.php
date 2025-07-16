@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\web\Policy;
 
 use App\Http\Controllers\Controller;
-use App\Models\PolicyView;
+use App\Models\Policies\PolicyView;
 
 class PolicyViewController extends Controller
 {

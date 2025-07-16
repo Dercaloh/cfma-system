@@ -1,33 +1,112 @@
 <?php
-// app/Models/Position.php
-namespace App\Models;
+
+namespace App\Models\Programs;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+use App\Traits\NormalizesTextFields;
+use App\Models\Users\User;
+
 class Position extends Model
 {
-    use SoftDeletes, HasFactory, \App\Traits\NormalizesTextFields;
+    use HasFactory, SoftDeletes, LogsActivity, NormalizesTextFields;
 
-    protected $fillable = ['title', 'active', 'created_by', 'updated_by', 'deleted_by'];
-    protected static $normalizeTextFields = ['name'];
-    // Relaciones con usuarios auditores
-    public function creator()
+    // Tabla asociada
+    protected $table = 'positions';
+
+    // Campos asignables
+    protected $fillable = [
+        'title',    // Nombre del cargo o función
+        'active',   // Estado de uso (tinyint)
+    ];
+
+    // Casts automáticos
+    protected $casts = [
+        'active' => 'boolean',
+    ];
+
+    // ────────── Relaciones ──────────
+
+    /**
+     * Usuarios que tienen esta posición
+     */
+    public function users(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-    public function updater()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-    public function deleter()
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
+        return $this->hasMany(User::class, 'position_id');
     }
 
-    // Position.php
-    public function getTitleAttribute($value)
+    // ────────── Scopes ──────────
+
+    /**
+     * Solo posiciones activas
+     */
+    public function scopeActive($query)
     {
-        return ucwords(strtolower($value)); // "Apoyo De Biblioteca"
+        return $query->where('active', true);
+    }
+
+    /**
+     * Solo posiciones inactivas
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('active', false);
+    }
+
+    /**
+     * Buscar por título
+     */
+    public function scopeSearch($query, string $term)
+    {
+        return $query->where('title', 'like', '%' . trim($term) . '%');
+    }
+
+    // ────────── Accessors & Mutators ──────────
+
+    /**
+     * Mostrar título capitalizado
+     */
+    public function getTitleAttribute(string $value): string
+    {
+        return ucwords(mb_strtolower($value));
+    }
+
+    /**
+     * Guardar título sin espacios extra
+     */
+    public function setTitleAttribute(string $value): void
+    {
+        $this->attributes['title'] = trim($value);
+    }
+
+    // ────────── Auditoría de actividad ──────────
+
+    protected static function booted(): void
+    {
+        static::creating(fn(self $m) => $m->logName = 'positions');
+        static::updating(fn(self $m) => $m->logName = 'positions');
+        static::deleting(fn(self $m) => $m->logName = 'positions');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('positions')
+            ->logOnly(['title', 'active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $event) =>
+                "La posición “{$this->title}” fue {$event}"
+            );
+    }
+
+    // ────────── Representación legible ──────────
+
+    public function __toString(): string
+    {
+        return $this->title;
     }
 }
