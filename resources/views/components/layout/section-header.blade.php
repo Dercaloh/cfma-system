@@ -6,12 +6,16 @@
 ])
 
 @php
+    // Mapeo de colores genéricos a clases institucionales
     $colorMap = [
-        'amber' => 'from-amber-500 to-amber-600',
-        'blue' => 'from-blue-500 to-blue-600',
-        'green' => 'from-green-500 to-green-600',
+        'amber' => 'from-sena-amarillo to-yellow-400',
+        'blue' => 'from-sena-azul to-sena-azul-600',
+        'green' => 'from-sena-verde to-sena-verde-sec',
         'red' => 'from-red-500 to-red-600',
-        'gray' => 'from-gray-500 to-gray-600',
+        'gray' => 'from-sena-gris-400 to-sena-gris-600',
+        'yellow' => 'from-sena-amarillo to-yellow-500',
+        'purple' => 'from-sena-azul-violeta to-purple-600',
+        'cyan' => 'from-sena-cian to-cyan-400',
     ];
 
     $gradient = $colorMap[$color] ?? $colorMap['gray'];
