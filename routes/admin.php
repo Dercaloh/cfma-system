@@ -10,6 +10,7 @@ use App\Http\Controllers\Documents\DocumentController;
 use App\Http\Controllers\Web\UbicacionesController;
 use App\Http\Controllers\Users\UsuarioImportController;
 use App\Http\Controllers\Assets\AssetTypeController;
+use App\Http\Controllers\DemoController;
 
 // En routes/web.php
 
@@ -88,4 +89,26 @@ Route::middleware(['auth', 'role:Administrador'])
             Route::delete('/{assetType}', [AssetTypeController::class, 'destroy'])->name('destroy');
             Route::patch('/{id}/restaurar', [AssetTypeController::class, 'restore'])->name('restore');
         });
+
+
+
+// Rutas para la demo de componentes
+Route::prefix('demo')->name('demo.')->group(function () {
+
+    // Vista principal de demo
+    Route::get('/components', [DemoController::class, 'components'])->name('components');
+
+    // API para filtros de tabla (simulación)
+    Route::get('/users', [DemoController::class, 'users'])->name('users');
+
+    // Subida de fotos (simulación)
+    Route::post('/upload-photo', [DemoController::class, 'uploadPhoto'])->name('upload-photo');
+
+    // Estadísticas de la demo
+    Route::get('/stats', [DemoController::class, 'stats'])->name('stats');
+});
+
+// Ruta alternativa más directa para acceso rápido
+Route::get('/demo-components', [DemoController::class, 'components'])->name('demo-components');
+
     });
