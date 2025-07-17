@@ -37,7 +37,7 @@
     <td class="px-6 py-4 whitespace-nowrap">
          <x-ui.status-badge
         :status="$assetType->trashed()
-            ? 'deleted'
+            ? 'inactive'
             : ($assetType->active ? 'active' : 'inactive')"
     />
     </td>

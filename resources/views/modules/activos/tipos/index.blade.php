@@ -39,7 +39,7 @@
                     <x-fields.select-field name="status" label="Estado" :options="[
                         '' => 'Todos los estados',
                         'active' => 'Activos',
-                        'inactive' => 'Inactivos',
+                        'inactive' => 'inactive',
                     ]"
                         value="{{ request('status') }}" class="{{ request('status') ? 'filter-active' : '' }}" />
                 </div>
